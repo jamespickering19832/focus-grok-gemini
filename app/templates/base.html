@@ -1,0 +1,117 @@
+<!-- app/templates/base.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}{% endblock %} - Letting Agent Accounting</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="{{ url_for('index') }}">Letting Agent Accounting</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mr-auto">
+                {% if current_user.is_authenticated %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownTransactions" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Transactions
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownTransactions">
+                        <a class="dropdown-item" href="{{ url_for('index') }}">Upload</a>
+                        <a class="dropdown-item" href="{{ url_for('uncoded_transactions') }}">Uncoded</a>
+                        <a class="dropdown-item" href="{{ url_for('banking') }}">Banking</a>
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownContacts" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Contacts
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownContacts">
+                        <a class="dropdown-item" href="{{ url_for('tenants') }}">Tenants</a>
+                        <a class="dropdown-item" href="{{ url_for('landlords') }}">Landlords</a>
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownStatements" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Statements
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownStatements">
+                        <a class="dropdown-item" href="{{ url_for('statements') }}">Landlord Statements</a>
+                        <a class="dropdown-item" href="{{ url_for('tenant_statement') }}">Tenant Statements</a>
+                        <a class="dropdown-item" href="{{ url_for('view_statements') }}">View Statements</a>
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownBilling" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Billing
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownBilling">
+                        <a class="dropdown-item" href="{{ url_for('generate_rent_charges') }}">Charge Rent</a>
+                        <a class="dropdown-item" href="{{ url_for('rent_charge_batches') }}">Rent Charge Batches</a>
+                        <a class="dropdown-item" href="{{ url_for('agency_fees') }}">Agency Fees</a>
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownManualEntries" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Manual Entries
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownManualEntries">
+                        <a class="dropdown-item" href="{{ url_for('add_manual_rent') }}">Add Rent</a>
+                        <a class="dropdown-item" href="{{ url_for('add_manual_expense') }}">Add Expense</a>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('reports') }}">Reports</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('accounts') }}">Accounts</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownSettings" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Settings
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownSettings">
+                        <a class="dropdown-item" href="{{ url_for('company') }}">Company Information</a>
+                        {% if current_user.is_authenticated and 'admin' in current_user.roles|map(attribute='name')|list %}
+                        <a class="dropdown-item" href="{{ url_for('admin') }}">Admin</a>
+                        {% endif %}
+                    </div>
+                </li>
+                {% endif %}
+            </ul>
+            <ul class="navbar-nav">
+                {% if current_user.is_anonymous %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                </li>
+                
+                {% else %}
+                <li class="nav-item">
+                    <span class="navbar-text">Logged in as: {{ current_user.username }}</span>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+    <div class="container">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div class="alert alert-info" role="alert">
+            {% for message in messages %}
+            {{ message }}
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

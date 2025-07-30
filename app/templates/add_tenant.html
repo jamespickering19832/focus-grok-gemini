@@ -1,0 +1,36 @@
+<!-- app/templates/add_tenant.html -->
+{% extends "base.html" %}
+
+{% block title %}Add Tenant{% endblock %}
+
+{% block content %}
+<h1 class="mt-4">Add New Tenant</h1>
+<form method="post">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        {{ form.name.label(class="form-label") }}
+        {{ form.name(class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.email.label(class="form-label") }}
+        {{ form.email(class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.phone_number.label(class="form-label") }}
+        {{ form.phone_number(class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.start_date.label(class="form-label") }}
+        {{ form.start_date(class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.reference_code.label(class="form-label") }}
+        {{ form.reference_code(class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.property_id.label(class="form-label") }}
+        {{ form.property_id(class="form-control") }}
+    </div>
+    {{ form.submit(class="btn btn-primary") }}
+</form>
+{% endblock %}

@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.pyc
+*.o
+*.so
+*.egg
+*.egg-info
+.Python
+build/
+dist/
+venv/
+.venv/
+
+# Flask specific
+instance/
+.flaskenv
+
+# Database
+*.db
+/app.db
+/grok_gemini_backup_*
+
+# Uploaded files
+/uploads/
+
+# Generated statements
+/statements/
+
+# Configuration files (if they contain sensitive info)
+# config.py # Uncomment if config.py contains sensitive data not managed by environment variables
+
+# Logs
+*.log

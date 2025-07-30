@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Admin</h1>
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title">User Management</h5>
+            <p class="card-text">Manage users and their roles.</p>
+            <a href="{{ url_for('manage_users') }}" class="btn btn-primary">Manage Users</a>
+            <a href="{{ url_for('register') }}" class="btn btn-secondary">Register New User</a>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Reset Data</h5>
+            <p class="card-text">This will delete all tenants, landlords, properties, accounts, and transactions. This action cannot be undone.</p>
+            <form action="{{ url_for('admin_reset_data') }}" method="POST" onsubmit="return confirm('Are you sure you want to delete all data? This is irreversible.');">
+                <button type="submit" class="btn btn-danger">Delete All Data</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}

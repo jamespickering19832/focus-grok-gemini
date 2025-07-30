@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Property{% endblock %}
+
+{% block content %}
+<h1 class="mt-4">Edit Property: {{ property.address }}</h1>
+<form method="post">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        {{ form.address.label(class="form-label") }}
+        {{ form.address(class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.rent_amount.label(class="form-label") }}
+        {{ form.rent_amount(class="form-control") }}
+    </div>
+    {{ form.submit(class="btn btn-primary") }}
+</form>
+{% endblock %}

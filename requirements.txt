@@ -1,0 +1,4 @@
+psycopg2-binary
+Flask-Login
+bcrypt
+Flask-Talisman

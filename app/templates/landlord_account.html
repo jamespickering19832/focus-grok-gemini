@@ -1,0 +1,41 @@
+<!-- app/templates/landlord_account.html -->
+{% extends "base.html" %}
+
+{% block title %}{{ landlord.name }} Account{% endblock %}
+
+{% block content %}
+<h1 class="mt-4">{{ landlord.name }} Account</h1>
+<div class="card">
+    <div class="card-body">
+        <p><strong>Balance:</strong> {{ account.balance }}</p>
+        <a href="{{ url_for('landlord_payout', landlord_id=landlord.id) }}" class="btn btn-primary">Process Payout</a>
+    </div>
+</div>
+<h2 class="mt-3">Transactions</h2>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Amount</th>
+            <th>Description</th>
+            <th>Category</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for trans in transactions %}
+        <tr>
+            <td>{{ trans.date }}</td>
+            <td>
+                {% if trans.category == 'expense' or trans.category == 'payment' %}
+                    {{ trans.amount }}
+                {% else %}
+                    {{ trans.amount }}
+                {% endif %}
+            </td>
+            <td>{{ trans.description }}</td>
+            <td>{{ trans.category }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Reports{% endblock %}
+
+{% block content %}
+<h1 class="mt-4">Reports</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">Agency Summary</div>
+            <div class="card-body">
+                <p>Unallocated Transactions: {{ unallocated }}</p>
+                <p>Total Agency Income: {{ agency_income | sum(attribute='balance') }}</p>
+                <p>Total Agency Expenses: {{ agency_expenses | sum(attribute='balance') }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <h2>Account Balances</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Account Name</th>
+                    <th>Type</th>
+                    <th>Balance</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for account in tenant_accounts %}
+                <tr>
+                    <td>{{ account.name }}</td>
+                    <td>{{ account.type }}</td>
+                    <td>{{ account.balance }}</td>
+                </tr>
+                {% endfor %}
+                {% for account in landlord_accounts %}
+                <tr>
+                    <td>{{ account.name }}</td>
+                    <td>{{ account.type }}</td>
+                    <td>{{ account.balance }}</td>
+                </tr>
+                {% endfor %}
+                {% for account in agency_income %}
+                <tr>
+                    <td>{{ account.name }}</td>
+                    <td>{{ account.type }}</td>
+                    <td>{{ account.balance }}</td>
+                </tr>
+                {% endfor %}
+                {% for account in agency_expenses %}
+                <tr>
+                    <td>{{ account.name }}</td>
+                    <td>{{ account.type }}</td>
+                    <td>{{ account.balance }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

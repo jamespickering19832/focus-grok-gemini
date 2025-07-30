@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Generated Statements</h1>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Date Generated</th>
+                <th>Type</th>
+                <th>Landlord/Tenant</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for statement in statements %}
+                <tr>
+                    <td>{{ statement.date_generated.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                    <td>{{ statement.type }}</td>
+                    <td>
+                        {% if statement.landlord_id %}
+                            {{ statement.landlord.name }}
+                        {% elif statement.tenant_id %}
+                            {{ statement.tenant.name }}
+                        {% endif %}
+                    </td>
+                    <td>{{ statement.start_date.strftime('%Y-%m-%d') if statement.start_date }}</td>
+                    <td>{{ statement.end_date.strftime('%Y-%m-%d') if statement.end_date }}</td>
+                    <td>
+                        <a href="{{ url_for('download_statement', filename=statement.pdf_path.split('/')[-1]) }}" class="btn btn-primary">Download</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

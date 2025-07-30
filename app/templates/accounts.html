@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>All Accounts</h1>
+    <div class="row">
+        {% for account in accounts %}
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ account.name }}</h5>
+                        <p class="card-text">Type: {{ account.type }}</p>
+                        <p class="card-text">Balance: £{{ account.balance|round(2) }}</p>
+                        <a href="{{ url_for('account_transactions', account_id=account.id) }}" class="btn btn-primary">View Transactions</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
