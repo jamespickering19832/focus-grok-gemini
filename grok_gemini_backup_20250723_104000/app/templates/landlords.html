@@ -1,0 +1,35 @@
+<!-- app/templates/landlords.html -->
+{% extends "base.html" %}
+
+{% block title %}Landlords{% endblock %}
+
+{% block content %}
+<h1 class="mt-4">Landlords</h1>
+<a href="{{ url_for('add_landlord') }}" class="btn btn-primary mb-3">Add New Landlord</a>
+<form method="get" class="form-inline mb-3">
+    <input type="text" name="search" class="form-control mr-2" value="{{ search }}" placeholder="Search landlords...">
+    <input type="submit" class="btn btn-secondary" value="Search">
+</form>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Reference Code</th>
+            <th>Commission Rate</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for landlord in landlords %}
+        <tr>
+            <td>{{ landlord.name }}</td>
+            <td>{{ landlord.email }}</td>
+            <td>{{ landlord.reference_code }}</td>
+            <td>{{ landlord.commission_rate }}</td>
+            <td><a href="{{ url_for('landlord_details', id=landlord.id) }}" class="btn btn-sm btn-info">Details</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,8 @@
+Landlord Statement for Property Management
+Period: 2025-04-30 to 2025-08-14
+Opening Balance: -825.0
+Rent Received: 0
+Expenses: 9330.0
+Agency Fees: 0.0
+Net: -9330.0
+Closing Balance: -10155.0

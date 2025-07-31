@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Banking Overview</h1>
+
+    <div class="row">
+        {% for key, account in accounts.items() %}
+        <div class="col-md-6 mb-4">
+            <a href="{{ url_for('account_transactions', account_id=account.id) }}" style="text-decoration: none; color: inherit;">
+                <div class="card">
+                    <div class="card-header">
+                        {{ account.name }} ({{ account.type.replace('_', ' ').title() }})
+                    
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Balance: {{ account.balance|round(2) }}</h5>
+                        <p class="card-text">Recent Transactions:</p>
+                        <ul class="list-group list-group-flush">
+                            {% for trans in account.recent_transactions %}
+                            <li class="list-group-item">
+                                {{ trans.date.strftime('%Y-%m-%d') }}: {{ trans.description }} ({{ trans.amount|round(2) }})
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+{% endblock %}

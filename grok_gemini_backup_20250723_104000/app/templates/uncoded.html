@@ -1,0 +1,97 @@
+<!-- app/templates/uncoded.html -->
+{% extends "base.html" %}
+
+{% block title %}Uncoded Transactions{% endblock %}
+
+{% block content %}
+<h1 class="mt-4">Uncoded Transactions</h1>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Amount</th>
+            <th>Description</th>
+            <th>Reference</th>
+            <th>Suggestions</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for trans, suggestions in transactions_with_suggestions %}
+        <tr>
+            <td>{{ trans.date }}</td>
+            <td>{{ trans.amount }}</td>
+            <td>{{ trans.description }}</td>
+            <td>{{ trans.reference_code }}</td>
+            <td>
+                {% if suggestions %}
+                <select class="form-control suggestion-select" data-transaction-id="{{ trans.id }}">
+                    <option value="">Select a suggestion</option>
+                    {% for type, id, text in suggestions %}
+                    <option value="{{ type }}_{{ id }}">{{ text }}</option>
+                    {% endfor %}
+                </select>
+                {% else %}
+                No suggestions
+                {% endif %}
+            </td>
+            <td>
+                <form method="post" action="{{ url_for('allocate') }}" class="form-inline allocate-form" id="form-{{ trans.id }}">
+                    <input type="hidden" name="transaction_id" value="{{ trans.id }}">
+                    <select name="type" class="form-control mr-2 type-select">
+                        <option value="tenant">Tenant</option>
+                        <option value="landlord">Landlord</option>
+                    </select>
+                    <select name="target_id" class="form-control mr-2 target-select">
+                        {% for t in tenants %}
+                        <option value="{{ t.id }}" class="tenant-option">{{ t.name }}</option>
+                        {% endfor %}
+                        {% for l in landlords %}
+                        <option value="{{ l.id }}" class="landlord-option" style="display:none;">{{ l.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="text" name="notes" placeholder="Notes" class="form-control mr-2">
+                    <input type="submit" value="Allocate" class="btn btn-primary btn-sm mr-2">
+                </form>
+                <a href="{{ url_for('quick_add_tenant', trans_id=trans.id) }}" class="btn btn-secondary btn-sm">Quick Add Tenant</a>
+                <form method="post" action="{{ url_for('mark_reviewed', transaction_id=trans.id) }}" class="form-inline" style="display:inline;">
+                    <input type="submit" value="Mark as Reviewed" class="btn btn-info btn-sm ml-2">
+                </form>
+                {% if not trans.is_bulk %}
+                <form method="post" action="{{ url_for('mark_as_bulk', transaction_id=trans.id) }}" class="form-inline" style="display:inline;">
+                    <input type="submit" value="Mark as Bulk" class="btn btn-warning btn-sm ml-2">
+                </form>
+                {% else %}
+                <a href="{{ url_for('split_transaction', transaction_id=trans.id) }}" class="btn btn-success btn-sm ml-2">Split</a>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<script>
+    document.querySelectorAll('.suggestion-select').forEach(select => {
+        select.addEventListener('change', function() {
+            const transactionId = this.dataset.transactionId;
+            const form = document.getElementById(`form-${transactionId}`);
+            const [type, id] = this.value.split('_');
+
+            form.querySelector('.type-select').value = type;
+            form.querySelector('.target-select').value = id;
+        });
+    });
+
+    document.querySelectorAll('.type-select').forEach(select => {
+        select.addEventListener('change', function() {
+            const targetSelect = this.nextElementSibling;
+            if (this.value === 'tenant') {
+                targetSelect.querySelectorAll('.tenant-option').forEach(opt => opt.style.display = '');
+                targetSelect.querySelectorAll('.landlord-option').forEach(opt => opt.style.display = 'none');
+            } else {
+                targetSelect.querySelectorAll('.tenant-option').forEach(opt => opt.style.display = 'none');
+                targetSelect.querySelectorAll('.landlord-option').forEach(opt => opt.style.display = '');
+            }
+        });
+    });
+</script>
+{% endblock %}

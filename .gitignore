@@ -1,33 +1,79 @@
-# Python
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.pyc
-*.o
+*.pyd
+*.pyo
 *.so
-*.egg
-*.egg-info
-.Python
-build/
-dist/
-venv/
-.venv/
 
-# Flask specific
-instance/
+# C extensions
+*.dll
+*.so
+*.dylib
+
+# Distribution / packaging
+.Python
+env/
+venv/
+build/
+develop-eggs/
+dist/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.memo
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+.pytest_cache/
+.hypothesis/
+
+# MyPy
+.mypy_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Environments
+.env
 .flaskenv
 
-# Database
-*.db
-/app.db
-/grok_gemini_backup_*
-
-# Uploaded files
-/uploads/
-
-# Generated statements
-/statements/
-
-# Configuration files (if they contain sensitive info)
-# config.py # Uncomment if config.py contains sensitive data not managed by environment variables
-
-# Logs
+# IDEs and editors
+.idea/
+.vscode/
+*.swp
+*.bak
+*.tmp
 *.log
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Added by Gemini
+.bashrc
+.cache/
+.gitconfig
+.ipython/
+.local/
+.profile
+.pythonstartup.py
+.vimrc
+README.txt
