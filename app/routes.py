@@ -1340,8 +1340,8 @@ def edit_user(id):
         if form.password.data:
             user.password_hash = bcrypt.hashpw(form.password.data.encode('utf-8'), bcrypt.gensalt())
         user.roles = []
-        for role_name in form.roles.data:
-            role = Role.query.filter_by(name=role_name).first()
+        for role_id in form.roles.data:
+            role = Role.query.get(role_id)
             if role:
                 user.roles.append(role)
         db.session.commit()
