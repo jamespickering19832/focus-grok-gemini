@@ -1333,6 +1333,7 @@ def manage_users():
 def edit_user(id):
     user = User.query.get_or_404(id)
     form = EditUserForm(obj=user)
+    form.roles.choices = [(role.id, role.name) for role in Role.query.all()]
     if form.validate_on_submit():
         user.username = form.username.data
         user.email = form.email.data
