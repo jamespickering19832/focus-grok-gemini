@@ -22,13 +22,13 @@ migrate = Migrate(app, db)
 mail = Mail(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'  # The route for the login page
-# talisman = Talisman(app, content_security_policy={
-#     'default-src': ["'self'"],
-#     'style-src': ["'self'", 'stackpath.bootstrapcdn.com'],
-#     'script-src': ["'self'", 'code.jquery.com', 'cdn.jsdelivr.net', 'stackpath.bootstrapcdn.com'],
-#     'img-src': ["'self'", 'data:'],
-#     'font-src': ["'self'", 'stackpath.bootstrapcdn.com'],
-# })
+talisman = Talisman(app, content_security_policy={
+    'default-src': ["'self'"],
+    'style-src': ["'self'", 'stackpath.bootstrapcdn.com'],
+    'script-src': ["'self'", 'code.jquery.com', 'cdn.jsdelivr.net', 'stackpath.bootstrapcdn.com'],
+    'img-src': ["'self'", 'data:'],
+    'font-src': ["'self'", 'stackpath.bootstrapcdn.com'],
+})
 
 from app import routes, models
 from app.forms import *
