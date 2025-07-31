@@ -16,7 +16,8 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(64), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.LargeBinary(128))
-    roles = db.relationship('Role', secondary=user_roles, backref=db.backref('users', lazy='dynamic'))
+    roles = db.relationship('Role', secondary=user_roles, lazy='subquery',
+        backref=db.backref('users', lazy=True))
 
     def __repr__(self):
         return f'<User {self.username}>'
