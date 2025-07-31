@@ -9,6 +9,9 @@ from app.models import User
 class EditUserForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired()])
+    password = PasswordField('New Password')
+    password2 = PasswordField(
+        'Repeat New Password', validators=[EqualTo('password', message='Passwords must match')])
     roles = SelectMultipleField('Roles', coerce=int)
     submit = SubmitField('Save Changes')
 
