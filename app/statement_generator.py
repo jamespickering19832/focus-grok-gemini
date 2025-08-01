@@ -10,7 +10,8 @@ from sqlalchemy import not_, and_
 def get_opening_balance(account, start_date):
     transactions = Transaction.query.filter(
         Transaction.account_id == account.id,
-        Transaction.date < start_date
+        Transaction.date < start_date,
+        ~Transaction.category.in_(['payout', 'fee', 'vat'])
     ).all()
     balance = sum(t.amount for t in transactions)
     return balance

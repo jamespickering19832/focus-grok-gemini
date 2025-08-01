@@ -74,6 +74,7 @@
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdownSettings">
                         <a class="dropdown-item" href="{{ url_for('company') }}">Company Information</a>
+                        <a class="dropdown-item" href="{{ url_for('change_date') }}">Change Date</a>
                         {% if current_user.is_authenticated and current_user.roles and 'admin' in current_user.roles|map(attribute='name')|list %}
                         <a class="dropdown-item" href="{{ url_for('admin') }}">Admin</a>
                         {% endif %}

@@ -5,3 +5,4 @@ Flask-Talisman
 Flask-Mail
 fpdf
 Flask-Migrate
+freezegun 

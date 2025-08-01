@@ -10,7 +10,17 @@ import difflib
 
 from app import mail
 from flask_mail import Message
-from app.forms import LoginForm, RegistrationForm, EditUserForm, AddTenantForm, AddLandlordForm, AddPropertyForm, EditTenantForm, DeleteTenantForm, EditLandlordForm, DeleteLandlordForm, EditPropertyForm, DeletePropertyForm, PayoutForm, ManualRentForm, ManualExpenseForm, DateRangeForm, CompanyForm
+from app.forms import LoginForm, RegistrationForm, EditUserForm, AddTenantForm, AddLandlordForm, AddPropertyForm, EditTenantForm, DeleteTenantForm, EditLandlordForm, DeleteLandlordForm, EditPropertyForm, DeletePropertyForm, PayoutForm, ManualRentForm, ManualExpenseForm, DateRangeForm, CompanyForm, ChangeDateForm
+from flask import session
+
+@app.route('/change_date', methods=['GET', 'POST'])
+def change_date():
+    form = ChangeDateForm()
+    if form.validate_on_submit():
+        session['system_date'] = form.date.data.strftime('%Y-%m-%d')
+        flash(f"System date changed to {session['system_date']}")
+        return redirect(url_for('index'))
+    return render_template('change_date.html', form=form)
 from app.accounting_service import allocate_transaction
 from app.payout_service import process_landlord_payout
 from sqlalchemy.exc import IntegrityError

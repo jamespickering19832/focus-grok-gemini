@@ -6,6 +6,10 @@ from wtforms import DateField, SelectMultipleField
 from flask_wtf.file import FileField, FileAllowed
 from app.models import User
 
+class ChangeDateForm(FlaskForm):
+    date = DateField('Date', format='%Y-%m-%d', validators=[DataRequired()])
+    submit = SubmitField('Change Date')
+
 class EditUserForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired()])
