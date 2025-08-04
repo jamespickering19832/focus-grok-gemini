@@ -1155,6 +1155,7 @@ def landlord_account(id):
     # Recalculate account balance from all relevant transactions, applying correct signs
     calculated_balance = 0
     for t in all_transactions:
+        print(f"Processing transaction: {t.id}, Category: {t.category}, Amount: {t.amount}")
         if t.category == 'rent_charge':
             calculated_balance -= t.amount
         elif t.category == 'rent':
@@ -1170,7 +1171,6 @@ def landlord_account(id):
         elif t.category == 'vat':
             calculated_balance += t.amount  # VAT is negative, so add it
         # Add other categories as needed
-
     account.balance = calculated_balance # Update the account object's balance for display
 
     return render_template('landlord_account.html', landlord=landlord, account=account, transactions=all_transactions)

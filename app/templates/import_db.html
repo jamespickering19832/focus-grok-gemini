@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Import Database</h1>
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Upload Database Backup</h5>
+            <p class="card-text">Select a database backup file (.dump) to restore the database. This will overwrite the current database.</p>
+            <form method="post" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="file">Backup File</label>
+                    <input type="file" class="form-control-file" id="file" name="file">
+                </div>
+                <button type="submit" class="btn btn-primary">Upload and Restore</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}

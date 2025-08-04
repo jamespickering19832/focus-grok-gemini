@@ -30,7 +30,7 @@ talisman = Talisman(app, content_security_policy={
     'font-src': ["'self'", 'stackpath.bootstrapcdn.com'],
 })
 
-from app import routes, models
+from app import routes, models, db_routes
 from app.forms import *
 
 @login_manager.user_loader

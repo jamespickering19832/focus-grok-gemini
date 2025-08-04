@@ -15,21 +15,20 @@ def process_landlord_payout(landlord_id, start_date, end_date, vat_rate):
 
     
 
-    # Get all transactions for the landlord within the specified date range to calculate commission
-    # This includes transactions directly linked to the landlord and rent transactions from their tenants.
-    landlord_direct_transactions = Transaction.query.filter(
+    # Get all transactions for the landlord within the specified date range to calculate the payout.
+    transactions = Transaction.query.filter(
         Transaction.landlord_id == landlord.id,
         Transaction.date.between(start_date, end_date)
-    )
+    ).all()
 
     tenant_ids = [t.id for p in landlord.properties for t in p.tenants]
     tenant_rent_transactions = Transaction.query.filter(
         Transaction.tenant_id.in_(tenant_ids),
         Transaction.category == 'rent',
         Transaction.date.between(start_date, end_date)
-    )
+    ).all()
 
-    transactions = landlord_direct_transactions.union(tenant_rent_transactions).all()
+    transactions.extend(tenant_rent_transactions)
 
     # Calculate rent income for commission calculation
     rent_income_for_commission = sum(t.amount for t in transactions if t.category == 'rent')
@@ -38,24 +37,8 @@ def process_landlord_payout(landlord_id, start_date, end_date, vat_rate):
     agency_commission = rent_income_for_commission * landlord.commission_rate
     vat_on_commission = agency_commission * vat_rate
 
-    all_transactions_query = landlord_direct_transactions.union(tenant_rent_transactions)
-    all_transactions = all_transactions_query.order_by(Transaction.date.desc()).all()
-
     # Recalculate the landlord account balance to ensure it's up-to-date
-    current_landlord_balance = 0
-    for t in all_transactions:
-        if t.category == 'rent_charge':
-            current_landlord_balance -= t.amount
-        elif t.category == 'rent':
-            current_landlord_balance += t.amount
-        elif t.category == 'expense':
-            current_landlord_balance += t.amount
-        elif t.category == 'payment':
-            current_landlord_balance += t.amount
-        elif t.category == 'fee':
-            current_landlord_balance -= t.amount
-        elif t.category == 'vat':
-            current_landlord_balance -= t.amount
+    current_landlord_balance = sum(t.amount for t in transactions)
 
     # The payout amount is the current calculated balance of the landlord's account
     # minus the agency commission and VAT on commission.

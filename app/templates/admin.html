@@ -12,6 +12,14 @@
     </div>
     <div class="card">
         <div class="card-body">
+            <h5 class="card-title">Database Management</h5>
+            <p class="card-text">Export the database to a backup file, or import a backup file to restore the database.</p>
+            <a href="{{ url_for('export_db') }}" class="btn btn-success">Export Database</a>
+            <a href="{{ url_for('import_db') }}" class="btn btn-warning">Import Database</a>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-body">
             <h5 class="card-title">Reset Data</h5>
             <p class="card-text">This will delete all tenants, landlords, properties, accounts, and transactions. This action cannot be undone.</p>
             <form action="{{ url_for('admin_reset_data') }}" method="POST" onsubmit="return confirm('Are you sure you want to delete all data? This is irreversible.');">
