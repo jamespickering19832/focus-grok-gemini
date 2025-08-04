@@ -28,40 +28,54 @@ def export_db():
         project_root = os.path.abspath(os.path.join(app.root_path, '..'))
         backups_dir = os.path.join(project_root, 'backups')
         os.makedirs(backups_dir, exist_ok=True)
-
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        backup_file = os.path.join(backups_dir, f"backup_{timestamp}.dump")
-        
-        from urllib.parse import urlparse
-        result = urlparse(app.config['SQLALCHEMY_DATABASE_URI'])
-        username = result.username
-        password = result.password
-        database = result.path[1:]
-        host = result.hostname
-        port = result.port or 5432
 
-        os.environ['PGPASSWORD'] = password
+        db_uri = app.config['SQLALCHEMY_DATABASE_URI']
 
-        command = [
-            r'C:\Program Files\PostgreSQL\17\bin\pg_dump',
-            '-U', username,
-            '-h', host,
-            '-p', str(port),
-            '-F', 'c',
-            '-b',
-            '-v',
-            '-f', backup_file,
-            database
-        ]
+        if db_uri.startswith('postgresql'):
+            backup_file = os.path.join(backups_dir, f"backup_{timestamp}.dump")
+            
+            from urllib.parse import urlparse
+            result = urlparse(db_uri)
+            username = result.username
+            password = result.password
+            database = result.path[1:]
+            host = result.hostname
+            port = result.port or 5432
 
-        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = process.communicate()
+            os.environ['PGPASSWORD'] = password
 
-        if process.returncode == 0:
+            command = [
+                r'C:\Program Files\PostgreSQL\17\bin\pg_dump',
+                '-U', username,
+                '-h', host,
+                '-p', str(port),
+                '-F', 'c',
+                '-b',
+                '-v',
+                '-f', backup_file,
+                database
+            ]
+
+            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            stdout, stderr = process.communicate()
+
+            if process.returncode == 0:
+                flash('Database exported successfully!', 'success')
+                return send_from_directory(backups_dir, os.path.basename(backup_file), as_attachment=True)
+            else:
+                flash(f'Error exporting database: {stderr.decode()}', 'danger')
+
+        elif db_uri.startswith('sqlite'):
+            db_path = db_uri.split('sqlite:///')[-1]
+            backup_file_path = os.path.join(backups_dir, f"backup_{timestamp}.db")
+            import shutil
+            shutil.copyfile(db_path, backup_file_path)
             flash('Database exported successfully!', 'success')
-            return send_from_directory(backups_dir, os.path.basename(backup_file), as_attachment=True)
+            return send_from_directory(backups_dir, os.path.basename(backup_file_path), as_attachment=True)
+
         else:
-            flash(f'Error exporting database: {stderr.decode()}', 'danger')
+            flash('Unsupported database type for export.', 'danger')
 
     except Exception as e:
         flash(f'An error occurred: {str(e)}', 'danger')
@@ -92,38 +106,49 @@ def import_db():
                 backup_file_path = os.path.join(uploads_dir, secure_filename(file.filename))
                 file.save(backup_file_path)
 
-                from urllib.parse import urlparse
-                result = urlparse(app.config['SQLALCHEMY_DATABASE_URI'])
-                username = result.username
-                password = result.password
-                database = result.path[1:]
-                host = result.hostname
-                port = result.port or 5432
+                db_uri = app.config['SQLALCHEMY_DATABASE_URI']
 
-                db.session.remove()
-                db.engine.dispose()
+                if db_uri.startswith('postgresql'):
+                    from urllib.parse import urlparse
+                    result = urlparse(db_uri)
+                    username = result.username
+                    password = result.password
+                    database = result.path[1:]
+                    host = result.hostname
+                    port = result.port or 5432
 
-                os.environ['PGPASSWORD'] = password
+                    os.environ['PGPASSWORD'] = password
 
-                command = [
-                    r'C:\Program Files\PostgreSQL\17\bin\pg_restore',
-                    '-U', username,
-                    '-h', host,
-                    '-p', str(port),
-                    '-d', database,
-                    '--clean',
-                    '--if-exists',
-                    '-v',
-                    backup_file_path
-                ]
+                    command = [
+                        r'C:\Program Files\PostgreSQL\17\bin\pg_restore',
+                        '-U', username,
+                        '-h', host,
+                        '-p', str(port),
+                        '-d', database,
+                        '--clean',
+                        '--if-exists',
+                        '-v',
+                        backup_file_path
+                    ]
 
-                process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                stdout, stderr = process.communicate()
+                    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    stdout, stderr = process.communicate()
 
-                if process.returncode == 0:
+                    if process.returncode == 0:
+                        flash('Database imported successfully!', 'success')
+                    else:
+                        flash(f'Error importing database: {stderr.decode()}', 'danger')
+                
+                elif db_uri.startswith('sqlite'):
+                    db.session.remove()
+                    db.engine.dispose()
+                    db_path = db_uri.split('sqlite:///')[-1]
+                    import shutil
+                    shutil.copyfile(backup_file_path, db_path)
                     flash('Database imported successfully!', 'success')
+
                 else:
-                    flash(f'Error importing database: {stderr.decode()}', 'danger')
+                    flash('Unsupported database type for import.', 'danger')
 
             except Exception as e:
                 flash(f'An error occurred: {str(e)}', 'danger')
