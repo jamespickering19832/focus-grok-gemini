@@ -1035,7 +1035,7 @@ def add_property(landlord_id):
 def edit_property(id):
     property_ = Property.query.get_or_404(id)
     form = EditPropertyForm()
-    form.utility_account_id.choices = [(0, 'None')] + [(a.id, a.name) for a in Account.query.order_by('name')]
+        form.utility_account_id.choices = [(0, 'None')] + [(a.id, a.name) for a in Account.query.filter(Account.type.notin_(['tenant', 'landlord'])).order_by('name')]
     if form.validate_on_submit():
         property_.address = form.address.data
         property_.rent_amount = form.rent_amount.data
