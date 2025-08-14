@@ -1,3 +1,4 @@
+
 @app.route('/company', methods=['GET', 'POST'])
 def company():
     company = Company.query.first()
