@@ -127,6 +127,8 @@ class DeleteTenantForm(FlaskForm):
 class AddPropertyForm(FlaskForm):
     address = StringField('Address', validators=[DataRequired()])
     rent_amount = FloatField('Rent Amount', validators=[DataRequired()])
+    landlord_portion = FloatField('Landlord Portion', default=1.0, validators=[DataRequired(), NumberRange(min=0.0, max=1.0)])
+    utility_account_id = SelectField('Utility Account', coerce=int, validators=[Optional()])
     landlord_id = HiddenField('Landlord ID')
     submit = SubmitField('Add Property')
 
