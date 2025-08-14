@@ -5,6 +5,8 @@ from flask_migrate import Migrate
 from flask_mail import Mail
 from flask_login import LoginManager
 from flask_talisman import Talisman
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 import os
 
 app = Flask(__name__)
@@ -21,7 +23,7 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 mail = Mail(app)
 login_manager = LoginManager(app)
-login_manager.login_view = 'login'  # The route for the login page
+login_manager.login_view = 'login'
 talisman = Talisman(app, content_security_policy={
     'default-src': ["'self'"],
     'style-src': ["'self'", 'stackpath.bootstrapcdn.com'],
