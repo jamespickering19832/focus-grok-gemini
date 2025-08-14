@@ -1,7 +1,7 @@
 # app/routes.py
 from flask import render_template, flash, redirect, url_for, request
 from werkzeug.utils import secure_filename
-from app import app, db
+from app import app, db, limiter
 from app.models import User, Role, Tenant, Landlord, Transaction, Account, Property, AllocationHistory, Statement, AuditLog, Expense, RentChargeBatch, Company
 from datetime import datetime, timedelta, date
 import os
