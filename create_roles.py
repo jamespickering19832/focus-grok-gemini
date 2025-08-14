@@ -5,22 +5,17 @@ from sqlalchemy import text
 
 def create_roles_and_admin_user():
     with app.app_context():
-        # Clear existing user_roles, users, and roles to ensure a clean state
-        # Need to disable foreign key checks temporarily for PostgreSQL
-        db.session.execute(text('SET CONSTRAINTS ALL DEFERRED'))
-        db.session.execute(text('TRUNCATE TABLE user_roles RESTART IDENTITY CASCADE'))
-        db.session.query(User).delete()
-        db.session.query(Role).delete()
-        db.session.commit()
-        print("Cleared existing users, roles, and user_roles.")
-
         # Create roles
         admin_role = Role(name='admin')
         user_role = Role(name='user')
+        landlord_role = Role(name='Landlord')
+        tenant_role = Role(name='Tenant')
         db.session.add(admin_role)
         db.session.add(user_role)
+        db.session.add(landlord_role)
+        db.session.add(tenant_role)
         db.session.commit()
-        print("Admin and User roles created.")
+        print("Roles created.")
 
         # Create a default admin user
         hashed_password = bcrypt.hashpw('adminpassword'.encode('utf-8'), bcrypt.gensalt())
