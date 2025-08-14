@@ -141,3 +141,15 @@ class EditPropertyForm(FlaskForm):
 
 class DeletePropertyForm(FlaskForm):
     submit = SubmitField('Delete Property')
+
+class AddAccountForm(FlaskForm):
+    name = StringField('Account Name', validators=[DataRequired()])
+    type = SelectField('Account Type', choices=[
+        ('asset', 'Asset'), 
+        ('liability', 'Liability'), 
+        ('utility', 'Utility'), 
+        ('suspense', 'Suspense'),
+        ('agency_income', 'Agency Income'),
+        ('agency_expense', 'Agency Expense')
+    ], validators=[DataRequired()])
+    submit = SubmitField('Create Account')

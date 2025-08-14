@@ -10,7 +10,7 @@ import difflib
 
 from app import mail
 from flask_mail import Message
-from app.forms import LoginForm, RegistrationForm, EditUserForm, AddTenantForm, AddLandlordForm, AddPropertyForm, EditTenantForm, DeleteTenantForm, EditLandlordForm, DeleteLandlordForm, EditPropertyForm, DeletePropertyForm, PayoutForm, ManualRentForm, ManualExpenseForm, DateRangeForm, CompanyForm, ChangeDateForm
+from app.forms import LoginForm, RegistrationForm, EditUserForm, AddTenantForm, AddLandlordForm, AddPropertyForm, EditTenantForm, DeleteTenantForm, EditLandlordForm, DeleteLandlordForm, EditPropertyForm, DeletePropertyForm, PayoutForm, ManualRentForm, ManualExpenseForm, DateRangeForm, CompanyForm, ChangeDateForm, AddAccountForm
 from flask import session
 
 @app.route('/change_date', methods=['GET', 'POST'])
@@ -667,6 +667,18 @@ def accounts():
         account.balance = calculated_balance
     db.session.commit()
     return render_template('accounts.html', accounts=accounts)
+
+@app.route('/add_account', methods=['GET', 'POST'])
+@login_required
+def add_account():
+    form = AddAccountForm()
+    if form.validate_on_submit():
+        new_account = Account(name=form.name.data, type=form.type.data, balance=0.0)
+        db.session.add(new_account)
+        db.session.commit()
+        flash(f'Account "{new_account.name}" created successfully.')
+        return redirect(url_for('accounts'))
+    return render_template('add_account.html', title='Add Account', form=form)
 
 @app.route('/agency_fees')
 def agency_fees():
