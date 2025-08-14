@@ -30,6 +30,13 @@ talisman = Talisman(app, content_security_policy={
     'font-src': ["'self'", 'stackpath.bootstrapcdn.com'],
 })
 
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["200 per day", "50 per hour"],
+    storage_uri="memory://"
+)
+
 from app import routes, models, db_routes
 from app.forms import *
 

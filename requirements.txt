@@ -6,3 +6,4 @@ Flask-Mail
 fpdf
 Flask-Migrate
 freezegun 
+Flask-Limiter
