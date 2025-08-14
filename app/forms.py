@@ -133,6 +133,8 @@ class AddPropertyForm(FlaskForm):
 class EditPropertyForm(FlaskForm):
     address = StringField('Address', validators=[DataRequired()])
     rent_amount = FloatField('Rent Amount', validators=[DataRequired()])
+    landlord_portion = FloatField('Landlord Portion', validators=[DataRequired(), NumberRange(min=0.0, max=1.0)])
+    utility_account_id = SelectField('Utility Account', coerce=int, validators=[Optional()])
     submit = SubmitField('Save Changes')
 
 class DeletePropertyForm(FlaskForm):

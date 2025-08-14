@@ -1023,9 +1023,12 @@ def add_property(landlord_id):
 def edit_property(id):
     property_ = Property.query.get_or_404(id)
     form = EditPropertyForm()
+    form.utility_account_id.choices = [(0, 'None')] + [(a.id, a.name) for a in Account.query.order_by('name')]
     if form.validate_on_submit():
         property_.address = form.address.data
         property_.rent_amount = form.rent_amount.data
+        property_.landlord_portion = form.landlord_portion.data
+        property_.utility_account_id = form.utility_account_id.data if form.utility_account_id.data != 0 else None
         db.session.commit()
         log_action('edit_property', f'Property {property_.address} (ID: {property_.id}) updated')
         flash('Property updated successfully')
@@ -1033,6 +1036,8 @@ def edit_property(id):
     elif request.method == 'GET':
         form.address.data = property_.address
         form.rent_amount.data = property_.rent_amount
+        form.landlord_portion.data = property_.landlord_portion
+        form.utility_account_id.data = property_.utility_account_id if property_.utility_account_id else 0
     return render_template('edit_property.html', form=form, property=property_)
 
 @app.route('/delete_property/<int:id>', methods=['POST'])

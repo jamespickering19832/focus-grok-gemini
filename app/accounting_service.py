@@ -74,6 +74,10 @@ def allocate_transaction(transaction):
             print(f"No account found for tenant {tenant.name}")
             return
 
+        # Tenant's account is always credited with the full rent amount to clear their balance.
+        tenant_account.update_balance(transaction.amount)
+        print(f"Tenant account for {tenant.name} credited with {transaction.amount}")
+
         property_ = tenant.property
         if not property_:
             print("No property assigned to this tenant")
@@ -84,16 +88,42 @@ def allocate_transaction(transaction):
             print(f"No account found for landlord {landlord.name}")
             return
 
-        print(f"Tenant account balance BEFORE rent payment: {tenant_account.balance:.2f}")
-        tenant_account.update_balance(transaction.amount)  # Tenant account increases (they paid, so credit)
-        print(f"Tenant account balance AFTER rent payment: {tenant_account.balance:.2f}")
+        # Check for and apply utility split
+        if property_.landlord_portion and property_.landlord_portion < 1.0 and property_.utility_account_id:
+            utility_account = Account.query.get(property_.utility_account_id)
+            if utility_account:
+                landlord_share = transaction.amount * property_.landlord_portion
+                utility_share = transaction.amount * (1 - property_.landlord_portion)
 
-        print(f"Landlord account balance BEFORE rent receipt: {landlord_account.balance:.2f}")
-        landlord_account.update_balance(transaction.amount) # Landlord account increases (they received rent)
-        print(f"Landlord account balance AFTER rent receipt: {landlord_account.balance:.2f}")
+                landlord_account.update_balance(landlord_share)
+                utility_account.update_balance(utility_share)
 
-        transaction.account_id = tenant_account.id # Link rent transaction to tenant account
-        print(f"Transaction {transaction.id}: Rent payment. Tenant account updated. Landlord account updated.")
+                # Create child transactions for ledger clarity
+                landlord_tx = Transaction(
+                    date=transaction.date, amount=landlord_share, description=f"Landlord share of rent from {tenant.name}",
+                    category='rent_landlord_share', landlord_id=landlord.id, parent_transaction_id=transaction.id,
+                    status='allocated', account_id=landlord_account.id
+                )
+                utility_tx = Transaction(
+                    date=transaction.date, amount=utility_share, description=f"Utility share of rent from {tenant.name}",
+                    category='rent_utility_share', account_id=utility_account.id, parent_transaction_id=transaction.id,
+                    status='allocated'
+                )
+                db.session.add_all([landlord_tx, utility_tx])
+                
+                transaction.status = 'split' # Mark original transaction as split
+                print(f"Transaction {transaction.id}: Rent payment SPLIT. Landlord: {landlord_share}, Utility: {utility_share}")
+            else:
+                # Fallback if utility account is misconfigured
+                landlord_account.update_balance(transaction.amount)
+                print(f"Transaction {transaction.id}: Rent payment. Utility account not found. Full amount to landlord.")
+        else:
+            # No split configured, allocate full amount to landlord
+            landlord_account.update_balance(transaction.amount)
+            print(f"Transaction {transaction.id}: Rent payment. Full amount to landlord.")
+
+        # Link original transaction to tenant account for their records
+        transaction.account_id = tenant_account.id
 
     elif transaction.category == 'expense' and transaction.landlord_id:
         landlord_account = Account.query.filter_by(landlord_id=transaction.landlord_id).first()
