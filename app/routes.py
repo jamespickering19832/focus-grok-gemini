@@ -1022,8 +1022,16 @@ def add_landlord():
 def add_property(landlord_id):
     form = AddPropertyForm()
     form.landlord_id.data = landlord_id
+    form.utility_account_id.choices = [(0, 'None')] + [(a.id, a.name) for a in Account.query.filter(Account.type.notin_(['tenant', 'landlord'])).order_by('name')]
     if form.validate_on_submit():
-        property_ = Property(address=form.address.data, rent_amount=form.rent_amount.data, landlord_id=landlord_id)
+        utility_id = form.utility_account_id.data if form.utility_account_id.data != 0 else None
+        property_ = Property(
+            address=form.address.data, 
+            rent_amount=form.rent_amount.data, 
+            landlord_id=landlord_id,
+            landlord_portion=form.landlord_portion.data,
+            utility_account_id=utility_id
+        )
         db.session.add(property_)
         db.session.commit()
         log_action('add_property', f'Property {property_.address} added')
@@ -1035,7 +1043,7 @@ def add_property(landlord_id):
 def edit_property(id):
     property_ = Property.query.get_or_404(id)
     form = EditPropertyForm()
-        form.utility_account_id.choices = [(0, 'None')] + [(a.id, a.name) for a in Account.query.filter(Account.type.notin_(['tenant', 'landlord'])).order_by('name')]
+    form.utility_account_id.choices = [(0, 'None')] + [(a.id, a.name) for a in Account.query.filter(Account.type.notin_(['tenant', 'landlord'])).order_by('name')]
     if form.validate_on_submit():
         property_.address = form.address.data
         property_.rent_amount = form.rent_amount.data
