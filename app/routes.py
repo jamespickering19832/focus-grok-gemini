@@ -8,6 +8,12 @@ from app.forms import CompanyForm, EditUserForm
 from flask_login import login_required
 from app.db_routes import role_required
 
+@app.route('/')
+@app.route('/index')
+@login_required
+def index():
+    return render_template('index.html', title='Home')
+
 @app.route('/company', methods=['GET', 'POST'])
 def company():
     company = Company.query.first()
