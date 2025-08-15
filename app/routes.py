@@ -1,18 +1,3 @@
-from flask import render_template, request, flash, redirect, url_for
-from werkzeug.utils import secure_filename
-import os
-import bcrypt
-from app import app, db
-from app.models import Company, User, Role, AllocationHistory, Transaction, Statement, AuditLog, Expense, RentChargeBatch, Account, Tenant, Property, Landlord
-from app.forms import CompanyForm, EditUserForm, LoginForm
-from flask_login import login_required, login_user, logout_user, current_user
-from app.db_routes import role_required
-
-@app.route('/')
-@app.route('/index')
-@login_required
-def index():
-    return render_template('index.html', title='Home')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -32,25 +17,6 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for('index'))
-
-@app.route('/company', methods=['GET', 'POST'])
-def company():
-    company = Company.query.first()
-    form = CompanyForm(obj=company)
-    if form.validate_on_submit():
-        if not company:
-            company = Company()
-            db.session.add(company)
-        form.populate_obj(company)
-        if form.logo.data:
-            filename = secure_filename(form.logo.data.filename)
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            form.logo.data.save(file_path)
-            company.logo = filename
-        db.session.commit()
-        flash('Company information updated successfully.')
-        return redirect(url_for('company'))
-    return render_template('company.html', form=form)
 
 @app.route('/admin')
 @login_required
