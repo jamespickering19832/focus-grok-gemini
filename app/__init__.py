@@ -39,7 +39,7 @@ limiter = Limiter(
     storage_uri="memory://"
 )
 
-from app import routes, models, db_routes
+from app import routes, models, db_routes, statement_generator
 from app.forms import *
 
 @login_manager.user_loader
