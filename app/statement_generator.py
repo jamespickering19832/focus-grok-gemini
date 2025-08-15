@@ -1,11 +1,11 @@
 from fpdf import FPDF
 from app.models import Landlord, Property, Tenant, Transaction, Expense, Account, Company, Statement
 from datetime import datetime, timedelta
-from app import db
+from app import app, db
 import os
-from flask import current_app
+from flask import current_app, request, flash, redirect, url_for, send_from_directory, render_template
 from sqlalchemy import not_, and_
-
+from flask_login import login_required
 
 def get_opening_balance(account, start_date):
     transactions = Transaction.query.filter(
@@ -449,3 +449,42 @@ def generate_annual_statement(landlord_id, year):
     db.session.commit()
 
     return file_path, None
+
+
+@app.route('/statements')
+@login_required
+def statements():
+    return render_template('statements.html')
+
+@app.route('/generate_statement', methods=['POST'])
+@login_required
+def generate_statement():
+    statement_type = request.form.get('statement_type')
+    if statement_type == 'monthly':
+        landlord_id = request.form.get('landlord_id')
+        month = request.form.get('month')
+        year = request.form.get('year')
+        # ... logic to generate monthly statement ...
+    elif statement_type == 'annual':
+        landlord_id = request.form.get('landlord_id')
+        year = request.form.get('year')
+        # ... logic to generate annual statement ...
+    elif statement_type == 'tenant':
+        tenant_id = request.form.get('tenant_id')
+        start_date = request.form.get('start_date')
+        end_date = request.form.get('end_date')
+        # ... logic to generate tenant statement ...
+    flash('Statement generated successfully.')
+    return redirect(url_for('statements'))
+
+@app.route('/view_statements')
+@login_required
+def view_statements():
+    statements = Statement.query.order_by(Statement.date_generated.desc()).all()
+    return render_template('view_statements.html', statements=statements)
+
+@app.route('/statements/download/<int:statement_id>')
+@login_required
+def download_statement(statement_id):
+    statement = Statement.query.get_or_404(statement_id)
+    return send_from_directory(os.path.abspath('statements'), os.path.basename(statement.pdf_path), as_attachment=True)
