@@ -4,6 +4,7 @@ from app import db
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 from flask_login import UserMixin
+import bcrypt
 
 # Association table for User and Role many-to-many relationship
 user_roles = db.Table('user_roles',
@@ -21,6 +22,12 @@ class User(UserMixin, db.Model):
 
     def __repr__(self):
         return f'<User {self.username}>'
+
+    def set_password(self, password):
+        self.password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+
+    def check_password(self, password):
+        return bcrypt.checkpw(password.encode('utf-8'), self.password_hash)
 
 class Role(db.Model):
     id = db.Column(db.Integer, primary_key=True)
