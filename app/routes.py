@@ -653,4 +653,15 @@ def rollback_rent_charges(batch_id):
     batch = RentChargeBatch.query.get_or_404(batch_id)
     for transaction in batch.transactions:
         # Reverse the allocation
+        if transaction.category == 'rent_charge' and transaction.tenant_id:
+            tenant_account = Account.query.filter_by(tenant_id=transaction.tenant_id).first()
+            if tenant_account:
+                tenant_account.update_balance(transaction.amount) # Add back the charged amount
+        db.session.delete(transaction)
+    
+    db.session.delete(batch)
+    db.session.commit()
+    log_action('rollback_rent_charges', f'Rolled back rent charges for batch {batch_id}')
+    flash('Rent charges rolled back successfully.')
+    return redirect(url_for('rent_charge_batches'))
         
