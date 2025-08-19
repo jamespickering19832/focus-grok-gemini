@@ -480,8 +480,8 @@ def view_statements():
     statements = Statement.query.order_by(Statement.date_generated.desc()).all()
     return render_template('view_statements.html', statements=statements)
 
-@app.route('/statements/download/<int:statement_id>')
+@app.route('/statements/download/<int:statement_id>', endpoint='download_generated_statement')
 @login_required
-def download_statement(statement_id):
+def download_generated_statement(statement_id):
     statement = Statement.query.get_or_404(statement_id)
     return send_from_directory(os.path.abspath('statements'), os.path.basename(statement.pdf_path), as_attachment=True)
