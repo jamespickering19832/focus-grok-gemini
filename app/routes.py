@@ -101,7 +101,7 @@ def process_csv(file_path):
                 else:
                     transaction.status = 'uncoded'
 
-                db.session.add(transaction)
+                db.session.add(transaction);
 
                 if transaction.status == 'coded':
                     allocate_transaction(transaction)
@@ -664,4 +664,3 @@ def rollback_rent_charges(batch_id):
     log_action('rollback_rent_charges', f'Rolled back rent charges for batch {batch_id}')
     flash('Rent charges rolled back successfully.')
     return redirect(url_for('rent_charge_batches'))
-        
