@@ -451,10 +451,7 @@ def generate_annual_statement(landlord_id, year):
     return file_path, None
 
 
-@app.route('/statements')
-@login_required
-def statements():
-    return render_template('statements.html')
+
 
 @app.route('/generate_statement', methods=['POST'])
 @login_required
