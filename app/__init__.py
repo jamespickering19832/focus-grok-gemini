@@ -39,13 +39,19 @@ limiter = Limiter(
     storage_uri="memory://"
 )
 
-from app import routes, models, db_routes, statement_generator
-from app.forms import *
+# Import models first, as other parts of the app depend on them.
+from app import models
 
+# Now, define the user loader which depends on the User model.
 @login_manager.user_loader
 def load_user(user_id):
     return models.User.query.get(int(user_id))
 
+# Import the routes and other components that depend on the app object and models.
+from app import routes, db_routes, statement_generator
+from app.forms import *
+
+# Define CLI commands. It's good practice to keep them at the end.
 @app.cli.command('send-monthly-statements')
 def send_monthly_statements():
     """Send monthly landlord statements via email."""
