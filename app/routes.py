@@ -620,7 +620,7 @@ def generate_rent_charges():
             ).first()
 
             if existing_charge:
-                flash(f'Rent charge for {tenant.name} for {rent_charge_date.strftime('%B %Y')} already exists. Skipping.')
+                flash(f'Rent charge for {tenant.name} for {rent_charge_date.strftime("%B %Y")} already exists. Skipping.')
                 continue
 
             prop = tenant.property
