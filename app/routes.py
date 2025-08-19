@@ -587,7 +587,7 @@ def generate_rent_charges():
         
         # Create a new rent charge batch
         batch = RentChargeBatch(
-            description=f'Monthly rent charges for {charge_date.strftime('%Y-%m')}',
+            description=f'Monthly rent charges for {charge_date.strftime("%Y-%m")}',
             timestamp=datetime.utcnow()
         )
         db.session.add(batch)
