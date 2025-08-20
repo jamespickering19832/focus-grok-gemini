@@ -1,46 +1,26 @@
-<!-- app/templates/tenant_account.html -->
 {% extends "base.html" %}
 
-{% block title %}Tenant Account: {{ tenant.name }}{% endblock %}
-
 {% block content %}
-<h1 class="mt-4">Tenant Account: {{ tenant.name }}</h1>
-<p>Current Balance: {{ account.balance }}</p>
+    <h1>Tenant Account: {{ tenant.name }}</h1>
+    <p>Balance: {{ account.balance }}</p>
 
-<h2 class="mt-4">Transactions</h2>
-<form action="{{ url_for('charge_tenant_rent', tenant_id=tenant.id) }}" method="post" class="mb-3">
-    <button type="submit" class="btn btn-primary">Charge Monthly Rent</button>
-</form>
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Date</th>
-            <th>Amount</th>
-            <th>Description</th>
-            <th>Category</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for trans in transactions %}
-        <tr>
-            <td>{{ trans.date }}</td>
-            <td>
-                {% if trans.category == 'rent_charge' %}
-                    {{ "-%.2f" % (trans.amount|abs) }} 
-                {% else %}
-                    {{ "%.2f" % trans.amount }}
-                {% endif %}
-            </td>
-            <td>{{ trans.description }}</td>
-            <td>{{ trans.category }}</td>
-            <td>
-                <form action="{{ url_for('delete_transaction_from_account', transaction_id=trans.id) }}" method="post" style="display:inline;">
-                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this transaction?');">Delete</button>
-                </form>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+    <h2>Transactions</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for transaction in transactions %}
+            <tr>
+                <td>{{ transaction.date }}</td>
+                <td>{{ transaction.description }}</td>
+                <td>{{ transaction.amount }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 {% endblock %}

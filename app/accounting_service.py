@@ -6,26 +6,13 @@ def allocate_transaction(transaction):
     if transaction.category == 'rent_charge' and transaction.tenant_id:
         tenant_account = Account.query.filter_by(tenant_id=transaction.tenant_id).first()
         if tenant_account:
-            tenant_account.update_balance(-abs(transaction.amount)) # Rent charge increases tenant debt (makes balance more negative)
+            tenant_account.update_balance(-abs(transaction.amount))
             transaction.status = 'allocated'
-            print(f"Transaction {transaction.id}: Rent charge. Tenant account updated.")
-        else:
-            print(f"No account found for tenant with ID {transaction.tenant_id}")
-        # Also update landlord account for rent charges, as it represents expected income
-        tenant = Tenant.query.get(transaction.tenant_id)
-        if tenant and tenant.property and tenant.property.landlord:
-            landlord_account = Account.query.filter_by(landlord_id=tenant.property.landlord.id).first()
-            if landlord_account:
-                landlord_account.update_balance(abs(transaction.amount)) # Landlord expects to receive rent
-                print(f"Transaction {transaction.id}: Rent charge. Landlord account updated.")
-        # Also update bank account for rent charges (expected inflow)
-        bank_account = Account.query.filter_by(name='Bank Account').first()
-        if bank_account:
-            bank_account.update_balance(abs(transaction.amount))
-            print(f"Transaction {transaction.id}: Rent charge. Bank account updated.")
-        return # Stop further processing for rent charges
+        # A rent charge is between the agency and the tenant. It doesn't affect the landlord's balance until the rent is paid.
+        # It also doesn't affect the bank account.
+        return
 
-    bank_account = Account.query.filter_by(name='Bank Account').first()
+    bank_account = Account.query.filter_by(name='Master Bank Account').first()
     suspense_account = Account.query.filter_by(name='Suspense Account').first()
     agency_income_account = Account.query.filter_by(name='Agency Income').first()
     agency_expense_account = Account.query.filter_by(name='Agency Expense').first()
@@ -40,47 +27,42 @@ def allocate_transaction(transaction):
         return
 
     # All transactions, whether coded or uncoded, should always be linked to the bank account for display.
-    # Ensure the transaction's account_id is the bank_account.id if it's not already.
-    if transaction.account_id != bank_account.id:
-        transaction.account_id = bank_account.id
+    
 
     # Update bank account balance for all transactions that flow through it
     if bank_account:
         bank_account.update_balance(transaction.amount)
-        print(f"Transaction {transaction.id}: Bank account updated with amount {transaction.amount}.")
+        
 
     # If transaction is not yet coded, it remains linked to the bank account but is marked 'uncoded'.
     # No special account handling is needed here.
     if transaction.status != 'coded':
-        print(f"Transaction {transaction.id} is not coded. No further allocation needed at this time.")
         return
 
     # Skip allocation for bulk transactions; their components will be allocated
     if transaction.is_bulk:
-        print(f"Transaction {transaction.id} is a bulk transaction. Skipping direct allocation.")
         transaction.status = 'split' # Mark as split, not allocated
         return
 
     # Process coded transactions
-    print(f"Transaction {transaction.id} is coded. Processing...")
+    
 
     if transaction.category == 'rent' and transaction.tenant_id:
         tenant = Tenant.query.get(transaction.tenant_id)
         if not tenant:
-            print(f"No tenant found for ID {transaction.tenant_id}")
+            pass
             return
         tenant_account = Account.query.filter_by(tenant_id=tenant.id).first()
         if not tenant_account:
-            print(f"No account found for tenant {tenant.name}")
+            pass
             return
 
         # Tenant's account is always credited with the full rent amount to clear their balance.
         tenant_account.update_balance(transaction.amount)
-        print(f"Tenant account for {tenant.name} credited with {transaction.amount}")
 
         property_ = tenant.property
         if not property_:
-            print("No property assigned to this tenant")
+            pass
             return
         landlord = property_.landlord
         landlord_account = Account.query.filter_by(landlord_id=landlord.id).first()
@@ -102,28 +84,57 @@ def allocate_transaction(transaction):
                 landlord_tx = Transaction(
                     date=transaction.date, amount=landlord_share, description=f"Landlord share of rent from {tenant.name}",
                     category='rent_landlord_share', landlord_id=landlord.id, parent_transaction_id=transaction.id,
-                    status='allocated', account_id=landlord_account.id
+                    status='allocated', account_id=landlord_account.id, reference_code=transaction.reference_code
                 )
                 utility_tx = Transaction(
                     date=transaction.date, amount=utility_share, description=f"Utility share of rent from {tenant.name}",
                     category='rent_utility_share', account_id=utility_account.id, parent_transaction_id=transaction.id,
-                    status='allocated'
+                    status='allocated', reference_code=transaction.reference_code
                 )
                 db.session.add_all([landlord_tx, utility_tx])
                 
                 transaction.status = 'split' # Mark original transaction as split
-                print(f"Transaction {transaction.id}: Rent payment SPLIT. Landlord: {landlord_share}, Utility: {utility_share}")
+                
             else:
-                # Fallback if utility account is misconfigured
+                # Fallback if utility account is not found, treat as no split
                 landlord_account.update_balance(transaction.amount)
-                print(f"Transaction {transaction.id}: Rent payment. Utility account not found. Full amount to landlord.")
+                transaction.landlord_id = landlord.id
+                transaction.account_id = landlord_account.id
         else:
-            # No split configured, allocate full amount to landlord
-            landlord_account.update_balance(transaction.amount)
-            print(f"Transaction {transaction.id}: Rent payment. Full amount to landlord.")
+            # No utility split, but commission might apply
+            commission_rate = landlord.commission_rate or 0.0
+            
+            if commission_rate > 0:
+                commission = transaction.amount * commission_rate
+                landlord_share = transaction.amount - commission
+                
+                # Update landlord account with their share
+                landlord_account.update_balance(landlord_share)
+                
+                # Update agency income account with commission
+                agency_income_account.update_balance(commission)
+                
+                # Create child transactions for ledger clarity
+                landlord_tx = Transaction(
+                    date=transaction.date, amount=landlord_share, description=f"Landlord share of rent from {tenant.name}",
+                    category='rent_landlord_share', landlord_id=landlord.id, parent_transaction_id=transaction.id,
+                    status='allocated', account_id=landlord_account.id, reference_code=transaction.reference_code
+                )
+                agency_tx = Transaction(
+                    date=transaction.date, amount=commission, description=f"Commission from {tenant.name}'s rent",
+                    category='fee', landlord_id=landlord.id, parent_transaction_id=transaction.id,
+                    status='allocated', account_id=agency_income_account.id, reference_code=transaction.reference_code
+                )
+                db.session.add_all([landlord_tx, agency_tx])
+                
+                transaction.status = 'split' # Mark original transaction as split
+            else:
+                # No commission, full amount to landlord
+                landlord_account.update_balance(transaction.amount)
+                transaction.landlord_id = landlord.id # Associate transaction directly with landlord
+                transaction.account_id = landlord_account.id
 
-        # Link original transaction to tenant account for their records
-        transaction.account_id = tenant_account.id
+        
 
     elif transaction.category == 'expense' and transaction.landlord_id:
         landlord_account = Account.query.filter_by(landlord_id=transaction.landlord_id).first()
@@ -150,20 +161,13 @@ def allocate_transaction(transaction):
     elif transaction.category == 'payout' and transaction.landlord_id:
         landlord_account = Account.query.filter_by(landlord_id=transaction.landlord_id).first()
         if not landlord_account:
-            print(f"No account found for landlord {transaction.landlord_id}")
+            pass
             return
-        print(f"Landlord account balance BEFORE payout: {landlord_account.balance:.2f}")
-        landlord_account.update_balance(transaction.amount) # Payout increases landlord's balance
-        print(f"Landlord account balance AFTER payout: {landlord_account.balance:.2f}")
-        transaction.account_id = landlord_account.id # Link payout transaction to landlord account
-        print(f"Transaction {transaction.id}: Landlord payout. Landlord account updated.")
+        landlord_account.update_balance(transaction.amount)
 
     # Mark transaction as allocated
     transaction.status = 'allocated'
 
-    print(f"Transaction {transaction.id} status set to allocated. Final account_id={transaction.account_id}")
+    
 
-    log = AuditLog(action='allocation', details=f'Transaction {transaction.id} allocated')
-    db.session.add(log)
-    db.session.commit()
-    print(f"Audit log for transaction {transaction.id} added.")
+    

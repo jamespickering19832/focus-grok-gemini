@@ -5,7 +5,7 @@
 
 {% block content %}
 <h1 class="mt-4">Landlords</h1>
-<a href="{{ url_for('add_landlord') }}" class="btn btn-primary mb-3">Add New Landlord</a>
+<a href="{{ url_for('main.add_landlord') }}" class="btn btn-primary mb-3">Add New Landlord</a>
 <form method="get" class="form-inline mb-3">
     <input type="text" name="search" class="form-control mr-2" value="{{ search }}" placeholder="Search landlords...">
     <input type="submit" class="btn btn-secondary" value="Search">
@@ -27,7 +27,7 @@
             <td>{{ landlord.email }}</td>
             <td>{{ landlord.reference_code }}</td>
             <td>{{ landlord.commission_rate }}</td>
-            <td><a href="{{ url_for('landlord_details', id=landlord.id) }}" class="btn btn-sm btn-info">Details</a></td>
+            <td><a href="{{ url_for('main.landlord_details', id=landlord.id) }}" class="btn btn-sm btn-info">Details</a></td>
         </tr>
         {% endfor %}
     </tbody>

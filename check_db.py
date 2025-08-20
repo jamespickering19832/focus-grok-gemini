@@ -1,8 +1,9 @@
-from app import db, app
+from app import db, create_app
 from app.models import Account, Transaction
 
+app = create_app()
 with app.app_context():
-    bank_account = Account.query.filter_by(name='Bank Account').first()
+    bank_account = Account.query.filter_by(name='Master Bank Account').first()
 
     print(f'Bank Account: {bank_account.id if bank_account else None}')
 

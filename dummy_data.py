@@ -1,5 +1,7 @@
 # dummy_data.py
-from app import app, db
+from app import create_app, db
+
+app = create_app()
 from app.models import Tenant, Landlord, Account, Property, ExpenseCategory
 
 def add_dummy_data():
@@ -51,7 +53,7 @@ def add_dummy_data():
         agency_income_account = Account(name='Agency Income', type='agency_income')
         agency_expense_account = Account(name='Agency Expense', type='agency_expense')
         suspense_account = Account(name='Suspense Account', type='suspense')
-        bank_account = Account(name='Bank Account', type='asset', balance=90000.0)
+        bank_account = Account(name='Master Bank Account', type='asset', balance=90000.0)
         utility_account = Account(name='Utility Account', type='utility')
 
         db.session.add_all([

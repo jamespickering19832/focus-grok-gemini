@@ -28,7 +28,7 @@
                     <td>{{ statement.start_date.strftime('%Y-%m-%d') if statement.start_date }}</td>
                     <td>{{ statement.end_date.strftime('%Y-%m-%d') if statement.end_date }}</td>
                     <td>
-                        <a href="{{ url_for('download_statement', filename=statement.pdf_path.split('/')[-1]) }}" class="btn btn-primary">Download</a>
+                        <a href="{{ url_for('statement.download_statement', filename=statement.pdf_path.split('/')[-1]) }}" class="btn btn-primary">Download</a>
                     </td>
                 </tr>
             {% endfor %}

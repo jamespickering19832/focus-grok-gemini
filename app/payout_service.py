@@ -30,26 +30,30 @@ def process_landlord_payout(landlord_id, start_date, end_date, vat_rate):
 
     transactions.extend(tenant_rent_transactions)
 
-    # Calculate rent income for commission calculation
-    rent_income_for_commission = sum(t.amount for t in transactions if t.category == 'rent')
+    # Filter out original rent transactions that have been split
+    split_rent_ids = [t.parent_transaction_id for t in transactions if t.category in ['rent_landlord_share', 'rent_utility_share']]
+    
+    final_transactions = [t for t in transactions if not (t.category == 'rent' and t.id in split_rent_ids)]
+
+    # Calculate rent income for commission calculation based on the landlord's actual share
+    rent_income_for_commission = sum(t.amount for t in final_transactions if t.category == 'rent_landlord_share' or (t.category == 'rent' and t.id not in split_rent_ids))
 
     # Calculate agency commission and VAT on commission
     agency_commission = rent_income_for_commission * landlord.commission_rate
     vat_on_commission = agency_commission * vat_rate
 
-    # Recalculate the landlord account balance to ensure it's up-to-date
-    current_landlord_balance = sum(t.amount for t in transactions)
+    # Calculate total expenses for the period
+    total_expenses = sum(t.amount for t in final_transactions if t.category == 'expense' and t.landlord_id == landlord_id)
 
-    # The payout amount is the current calculated balance of the landlord's account
-    # minus the agency commission and VAT on commission.
-    # The landlord's account balance should already reflect all rent and expenses.
-    payout_amount = current_landlord_balance - agency_commission - vat_on_commission
+    # The payout amount is the rent income minus expenses, commission, and VAT.
+    # Note: expenses are stored as negative values, so we add them.
+    payout_amount = rent_income_for_commission + total_expenses - agency_commission - vat_on_commission
 
     agency_income_account = Account.query.filter_by(name='Agency Income').first()
     if not agency_income_account:
         raise ValueError("Agency Income account not found")
 
-    vat_account = Account.query.filter_by(name='VAT').first()
+    vat_account = Account.query.filter_by(name='VAT Account').first()
     if not vat_account:
         raise ValueError("VAT account not found")
 
@@ -58,15 +62,24 @@ def process_landlord_payout(landlord_id, start_date, end_date, vat_rate):
     today = date.today()
 
     # Get all the necessary accounts
-    bank_account = Account.query.filter_by(name='Bank Account').first()
+    bank_account = Account.query.filter_by(name='Master Bank Account').first()
     agency_income_account = Account.query.filter_by(name='Agency Income').first()
-    vat_account = Account.query.filter_by(name='VAT').first()
+    vat_account = Account.query.filter_by(name='VAT Account').first()
 
-    if not all([bank_account, agency_income_account, vat_account]):
-        raise ValueError("One or more system accounts (Bank, Agency Income, VAT) are missing.")
+    if not bank_account:
+        raise ValueError("Master Bank Account not found.")
+    if not agency_income_account:
+        raise ValueError("Agency Income account not found.")
+    if not vat_account:
+        raise ValueError("VAT account not found.")
 
     # 1. Landlord account (only negative transactions)
     if landlord_account:
+        # Update landlord's balance
+        landlord_account.update_balance(-agency_commission)
+        landlord_account.update_balance(-vat_on_commission)
+        landlord_account.update_balance(-payout_amount)
+
         db.session.add(Transaction(
             date=today,
             amount=-agency_commission,
@@ -97,24 +110,24 @@ def process_landlord_payout(landlord_id, start_date, end_date, vat_rate):
 
     # 2. Agency Income (only positive, NOT landlord account)
     if agency_income_account:
+        agency_income_account.update_balance(agency_commission)
         db.session.add(Transaction(
             date=today,
             amount=agency_commission,
             description='Agency Commission',
             category='fee',
-            landlord_id=landlord.id,
             account_id=agency_income_account.id,
             status='allocated'
         ))
 
     # 3. VAT (only positive, NOT landlord account)
     if vat_account:
+        vat_account.update_balance(vat_on_commission)
         db.session.add(Transaction(
             date=today,
             amount=vat_on_commission,
             description='VAT on Commission',
             category='vat',
-            landlord_id=landlord.id,
             account_id=vat_account.id,
             status='allocated'
         ))

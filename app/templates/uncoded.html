@@ -36,7 +36,7 @@
                 {% endif %}
             </td>
             <td>
-                <form method="post" action="{{ url_for('allocate') }}" class="form-inline allocate-form" id="form-{{ trans.id }}">
+                <form method="post" action="{{ url_for('main.allocate') }}" class="form-inline allocate-form" id="form-{{ trans.id }}">
                     <input type="hidden" name="transaction_id" value="{{ trans.id }}">
                     <select name="type" class="form-control mr-2 type-select">
                         <option value="tenant">Tenant</option>
@@ -58,17 +58,14 @@
                     <input type="text" name="notes" placeholder="Notes" class="form-control mr-2">
                     <input type="submit" value="Allocate" class="btn btn-primary btn-sm mr-2">
                 </form>
-                <a href="{{ url_for('quick_add_tenant', trans_id=trans.id) }}" class="btn btn-secondary btn-sm">Quick Add Tenant</a>
-                <form method="post" action="{{ url_for('mark_reviewed', transaction_id=trans.id) }}" class="form-inline" style="display:inline;">
-                    <input type="submit" value="Mark as Reviewed" class="btn btn-info btn-sm ml-2">
+                <a href="{{ url_for('main.quick_add_tenant', trans_id=trans.id) }}" class="btn btn-secondary btn-sm">Quick Add Tenant</a>
+                <form method="post" action="{{ url_for('main.mark_reviewed', transaction_id=trans.id) }}" class="form-inline" style="display:inline;">
+                    <button type="submit" class="btn btn-info btn-sm">Mark Reviewed</button>
                 </form>
-                {% if not trans.is_bulk %}
-                <form method="post" action="{{ url_for('mark_as_bulk', transaction_id=trans.id) }}" class="form-inline" style="display:inline;">
-                    <input type="submit" value="Mark as Bulk" class="btn btn-warning btn-sm ml-2">
+                <form method="post" action="{{ url_for('main.mark_as_bulk', transaction_id=trans.id) }}" class="form-inline" style="display:inline;">
+                    <button type="submit" class="btn btn-warning btn-sm">Mark as Bulk</button>
                 </form>
-                {% else %}
-                <a href="{{ url_for('split_transaction', transaction_id=trans.id) }}" class="btn btn-success btn-sm ml-2">Split</a>
-                {% endif %}
+                <a href="{{ url_for('main.split_transaction', transaction_id=trans.id) }}" class="btn btn-success btn-sm ml-2">Split</a>
             </td>
         </tr>
         {% endfor %}

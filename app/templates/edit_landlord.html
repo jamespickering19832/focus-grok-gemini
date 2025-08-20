@@ -1,51 +1,45 @@
 {% extends "base.html" %}
 
-{% block title %}Edit Landlord{% endblock %}
-
 {% block content %}
-<h1 class="mt-4">Edit Landlord: {{ landlord.name }}</h1>
-<form method="post">
-    {{ form.hidden_tag() }}
-    <div class="form-group">
-        {{ form.name.label(class="form-label") }}
-        {{ form.name(class="form-control") }}
-    </div>
-    <div class="form-group">
-        {{ form.email.label(class="form-label") }}
-        {{ form.email(class="form-control") }}
-    </div>
-    <div class="form-group">
-        {{ form.phone_number.label(class="form-label") }}
-        {{ form.phone_number(class="form-control") }}
-    </div>
-    <div class="form-group">
-        {{ form.address.label(class="form-label") }}
-        {{ form.address(class="form-control") }}
-    </div>
-    <div class="form-group">
-        {{ form.bank_name.label(class="form-label") }}
-        {{ form.bank_name(class="form-control") }}
-    </div>
-    <div class="form-group">
-        {{ form.bank_account_number.label(class="form-label") }}
-        {{ form.bank_account_number(class="form-control") }}
-    </div>
-    <div class="form-group">
-        {{ form.bank_sort_code.label(class="form-label") }}
-        {{ form.bank_sort_code(class="form-control") }}
-    </div>
-    <div class="form-group">
-        {{ form.reference_code.label(class="form-label") }}
-        {{ form.reference_code(class="form-control") }}
-    </div>
-    <div class="form-group">
-        {{ form.commission_rate.label(class="form-label") }}
-        {{ form.commission_rate(class="form-control") }}
-    </div>
-    <div class="form-group form-check">
-        {{ form.receives_email_statements(class="form-check-input") }}
-        {{ form.receives_email_statements.label(class="form-check-label") }}
-    </div>
-    {{ form.submit(class="btn btn-primary") }}
-</form>
+    <h1>Edit Landlord</h1>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+            {{ form.name.label }}
+            {{ form.name(class="form-control") }}
+        </div>
+        <div class="form-group">
+            {{ form.email.label }}
+            {{ form.email(class="form-control") }}
+        </div>
+        <div class="form-group">
+            {{ form.phone_number.label }}
+            {{ form.phone_number(class="form-control") }}
+        </div>
+        <div class="form-group">
+            {{ form.address.label }}
+            {{ form.address(class="form-control") }}
+        </div>
+        <div class="form-group">
+            {{ form.bank_name.label }}
+            {{ form.bank_name(class="form-control") }}
+        </div>
+        <div class="form-group">
+            {{ form.bank_account_number.label }}
+            {{ form.bank_account_number(class="form-control") }}
+        </div>
+        <div class="form-group">
+            {{ form.bank_sort_code.label }}
+            {{ form.bank_sort_code(class="form-control") }}
+        </div>
+        <div class="form-group">
+            {{ form.reference_code.label }}
+            {{ form.reference_code(class="form-control") }}
+        </div>
+        <div class="form-group">
+            {{ form.commission_rate.label }}
+            {{ form.commission_rate(class="form-control") }}
+        </div>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+    </form>
 {% endblock %}

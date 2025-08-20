@@ -3,7 +3,7 @@
 {% block content %}
     <h1>All Accounts</h1>
     <div class="mb-3">
-        <a href="{{ url_for('add_account') }}" class="btn btn-success">Add New Account</a>
+        <a href="{{ url_for('main.add_account') }}" class="btn btn-success">Add New Account</a>
     </div>
     <div class="row">
         {% for account in accounts %}
@@ -13,7 +13,7 @@
                         <h5 class="card-title">{{ account.name }}</h5>
                         <p class="card-text">Type: {{ account.type }}</p>
                         <p class="card-text">Balance: £{{ account.balance|round(2) }}</p>
-                        <a href="{{ url_for('account_transactions', account_id=account.id) }}" class="btn btn-primary">View Transactions</a>
+                        <a href="{{ url_for('main.account_transactions', account_id=account.id) }}" class="btn btn-primary">View Transactions</a>
                     </div>
                 </div>
             </div>

@@ -5,7 +5,7 @@
 
 {% block content %}
 <h1 class="mt-4">Upload Bank Transactions CSV</h1>
-<form method="post" enctype="multipart/form-data">
+<form method="post" enctype="multipart/form-data" action="{{ url_for('main.upload_file') }}">
     <div class="form-group">
         <label for="file">Choose CSV File:</label>
         <input type="file" name="file" id="file" class="form-control-file">

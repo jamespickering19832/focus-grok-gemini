@@ -7,7 +7,7 @@
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="{{ url_for('index') }}">Letting Agent Accounting</a>
+        <a class="navbar-brand" href="{{ url_for('main.index') }}">Letting Agent Accounting</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -19,9 +19,9 @@
                         Transactions
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdownTransactions">
-                        <a class="dropdown-item" href="{{ url_for('index') }}">Upload</a>
-                        <a class="dropdown-item" href="{{ url_for('uncoded_transactions') }}">Uncoded</a>
-                        <a class="dropdown-item" href="{{ url_for('banking') }}">Banking</a>
+                        <a class="dropdown-item" href="{{ url_for('main.upload_file') }}">Upload</a>
+                        <a class="dropdown-item" href="{{ url_for('main.uncoded_transactions') }}">Uncoded</a>
+                        <a class="dropdown-item" href="{{ url_for('main.banking') }}">Banking</a>
                     </div>
                 </li>
                 <li class="nav-item dropdown">
@@ -29,8 +29,8 @@
                         Contacts
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdownContacts">
-                        <a class="dropdown-item" href="{{ url_for('tenants') }}">Tenants</a>
-                        <a class="dropdown-item" href="{{ url_for('landlords') }}">Landlords</a>
+                        <a class="dropdown-item" href="{{ url_for('main.tenants') }}">Tenants</a>
+                        <a class="dropdown-item" href="{{ url_for('main.landlords') }}">Landlords</a>
                     </div>
                 </li>
                 <li class="nav-item dropdown">
@@ -38,9 +38,9 @@
                         Statements
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdownStatements">
-                        <a class="dropdown-item" href="{{ url_for('statements') }}">Landlord Statements</a>
-                        <a class="dropdown-item" href="{{ url_for('tenant_statement') }}">Tenant Statements</a>
-                        <a class="dropdown-item" href="{{ url_for('view_statements') }}">View Statements</a>
+                        <a class="dropdown-item" href="{{ url_for('main.statements') }}">Landlord Statements</a>
+                        <a class="dropdown-item" href="{{ url_for('main.tenant_statement') }}">Tenant Statements</a>
+                        <a class="dropdown-item" href="{{ url_for('main.view_statements') }}">View Statements</a>
                     </div>
                 </li>
                 <li class="nav-item dropdown">
@@ -48,9 +48,9 @@
                         Billing
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdownBilling">
-                        <a class="dropdown-item" href="{{ url_for('generate_rent_charges') }}">Charge Rent</a>
-                        <a class="dropdown-item" href="{{ url_for('rent_charge_batches') }}">Rent Charge Batches</a>
-                        <a class="dropdown-item" href="{{ url_for('agency_fees') }}">Agency Fees</a>
+                        <a class="dropdown-item" href="{{ url_for('main.generate_rent_charges') }}">Charge Rent</a>
+                        <a class="dropdown-item" href="{{ url_for('main.rent_charge_batches') }}">Rent Charge Batches</a>
+                        <a class="dropdown-item" href="{{ url_for('main.agency_fees') }}">Agency Fees</a>
                     </div>
                 </li>
                 <li class="nav-item dropdown">
@@ -58,25 +58,25 @@
                         Manual Entries
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdownManualEntries">
-                        <a class="dropdown-item" href="{{ url_for('add_manual_rent') }}">Add Rent</a>
-                        <a class="dropdown-item" href="{{ url_for('add_manual_expense') }}">Add Expense</a>
+                        <a class="dropdown-item" href="{{ url_for('main.add_manual_rent') }}">Add Rent</a>
+                        <a class="dropdown-item" href="{{ url_for('main.add_manual_expense') }}">Add Expense</a>
                     </div>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('reports') }}">Reports</a>
+                    <a class="nav-link" href="{{ url_for('main.reports') }}">Reports</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('accounts') }}">Accounts</a>
+                    <a class="nav-link" href="{{ url_for('main.accounts') }}">Accounts</a>
                 </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownSettings" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         Settings
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdownSettings">
-                        <a class="dropdown-item" href="{{ url_for('company') }}">Company Information</a>
-                        <a class="dropdown-item" href="{{ url_for('change_date') }}">Change Date</a>
+                        <a class="dropdown-item" href="{{ url_for('main.company') }}">Company Information</a>
+                        <a class="dropdown-item" href="{{ url_for('main.change_date') }}">Change Date</a>
                         {% if current_user.is_authenticated and current_user.roles and 'admin' in current_user.roles|map(attribute='name')|list %}
-                        <a class="dropdown-item" href="{{ url_for('admin') }}">Admin</a>
+                        <a class="dropdown-item" href="{{ url_for('main.admin') }}">Admin</a>
                         {% endif %}
                     </div>
                 </li>
@@ -85,7 +85,7 @@
             <ul class="navbar-nav">
                 {% if current_user.is_anonymous %}
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                    <a class="nav-link" href="{{ url_for('main.login') }}">Login</a>
                 </li>
                 
                 {% else %}
@@ -93,7 +93,7 @@
                     <span class="navbar-text">Logged in as: {{ current_user.username }}</span>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                    <a class="nav-link" href="{{ url_for('main.logout') }}">Logout</a>
                 </li>
                 {% endif %}
             </ul>

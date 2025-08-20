@@ -13,7 +13,7 @@
     <div class="card mb-4">
         <div class="card-body">
             <h5 class="card-title">Filters</h5>
-            <form method="POST" action="{{ url_for('banking') }}" class="form">
+            <form method="POST" action="{{ url_for('main.banking') }}" class="form">
                 {{ form.hidden_tag() }}
                 <div class="form-row">
                     <div class="form-group col-md-4">
@@ -71,11 +71,11 @@
                                 </td>
                                 <td>
                                     {% if transaction.tenant %}
-                                        <a href="{{ url_for('tenant_details', id=transaction.tenant.id) }}" class="btn btn-info btn-sm">View Tenant</a>
+                                        <a href="{{ url_for('main.tenant_details', id=transaction.tenant.id) }}" class="btn btn-info btn-sm">View Tenant</a>
                                     {% elif transaction.landlord %}
-                                        <a href="{{ url_for('landlord_details', id=transaction.landlord.id) }}" class="btn btn-info btn-sm">View Landlord</a>
+                                        <a href="{{ url_for('main.landlord_details', id=transaction.landlord.id) }}" class="btn btn-info btn-sm">View Landlord</a>
                                     {% endif %}
-                                    <form action="{{ url_for('delete_transaction', transaction_id=transaction.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this transaction?');" style="display:inline;">
+                                    <form action="{{ url_for('main.delete_transaction', transaction_id=transaction.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this transaction?');" style="display:inline;">
                                         <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                                     </form>
                                 </td>

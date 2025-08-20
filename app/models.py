@@ -92,6 +92,8 @@ class Account(db.Model):
     transactions = db.relationship('Transaction', backref='account', lazy='dynamic')
 
     def update_balance(self, amount):
+        if self.balance is None:
+            self.balance = 0.0
         self.balance += amount
 
     def __repr__(self):
@@ -115,6 +117,7 @@ class Transaction(db.Model):
     parent_transaction_id = db.Column(db.Integer, db.ForeignKey('transaction.id'), nullable=True)
     property_id = db.Column(db.Integer, db.ForeignKey('property.id'), nullable=True) # Added property_id
     reviewed = db.Column(db.Boolean, default=False, nullable=False)
+    child_transactions = db.relationship('Transaction', backref=db.backref('parent_transaction', remote_side=[id]), lazy='dynamic')
 
     def __repr__(self):
         return f'<Transaction {self.description} Amount {self.amount}>'

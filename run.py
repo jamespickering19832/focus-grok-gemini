@@ -1,5 +1,7 @@
 # run.py
-from app import app
+from app import create_app
+
+app = create_app()
 from freezegun import freeze_time
 from flask import session
 

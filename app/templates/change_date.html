@@ -1,16 +1,13 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Change System Date</h1>
-    <form action="" method="post" novalidate>
+    <h1>Change Date</h1>
+    <form method="POST">
         {{ form.hidden_tag() }}
-        <p>
-            {{ form.date.label }}<br>
-            {{ form.date(size=32) }}
-            {% for error in form.date.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-            {% endfor %}
-        </p>
-        <p>{{ form.submit() }}</p>
+        <div class="form-group">
+            {{ form.new_date.label }}
+            {{ form.new_date(class="form-control") }}
+        </div>
+        <button type="submit" class="btn btn-primary">Change Date</button>
     </form>
 {% endblock %}

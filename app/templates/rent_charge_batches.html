@@ -20,7 +20,7 @@
             <td>{{ batch.description }}</td>
             <td>{{ batch.timestamp }}</td>
             <td>
-                <form action="{{ url_for('rollback_rent_charges', batch_id=batch.id) }}" method="post" style="display:inline;">
+                <form action="{{ url_for('main.rollback_rent_charges', batch_id=batch.id) }}" method="post" style="display:inline;">
                     <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to rollback this batch? This will delete all transactions in this batch.');">Rollback</button>
                 </form>
             </td>

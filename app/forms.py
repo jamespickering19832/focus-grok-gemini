@@ -74,6 +74,15 @@ class PayoutForm(FlaskForm):
     vat_rate = FloatField('VAT Rate', validators=[DataRequired(), NumberRange(min=0, max=1)], default=0.2)
     submit = SubmitField('Process Payout')
 
+class StatementGenerationForm(FlaskForm):
+    landlord_id = SelectField('Landlord', coerce=int, validators=[DataRequired()])
+    statement_type = SelectField('Statement Type', choices=[('monthly', 'Monthly'), ('annual', 'Annual')], validators=[DataRequired()])
+    start_date = DateField('Start Date', format='%Y-%m-%d', validators=[Optional()])
+    end_date = DateField('End Date', format='%Y-%m-%d', validators=[Optional()])
+    year = StringField('Year', validators=[Optional()])
+    vat_rate = FloatField('VAT Rate', validators=[DataRequired(), NumberRange(min=0, max=1)], default=0.2)
+    submit = SubmitField('Generate Statement')
+
 
 class AddTenantForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
