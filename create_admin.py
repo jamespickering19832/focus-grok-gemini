@@ -1,11 +1,11 @@
 
 import bcrypt
-from app import app, db
+from app import create_app, db
 from app.models import User, Role
 
-with app.app_context():
-    db.create_all() # Ensure all tables are created
+app = create_app()
 
+with app.app_context():
     # Check if admin role exists, if not create it
     admin_role = Role.query.filter_by(name='admin').first()
     if not admin_role:
@@ -30,7 +30,12 @@ with app.app_context():
         db.session.add(admin_user)
         print("Admin user created.")
     else:
-        print("Admin user already exists.")
+        # Ensure the admin user has the admin role
+        if admin_role not in admin_user.roles:
+            admin_user.roles.append(admin_role)
+            print("Added admin role to existing admin user.")
+        else:
+            print("Admin user already exists and has admin role.")
 
     # Commit changes
     db.session.commit()
