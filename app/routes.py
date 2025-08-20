@@ -465,9 +465,8 @@ def download_statement(filename):
 @main_bp.route('/accounts')
 @login_required
 def accounts():
-    all_accounts = Account.query.order_by(Account.name).all()
-    print(all_accounts)
-    return render_template('accounts.html', accounts=all_accounts)
+    main_accounts = Account.query.filter(Account.tenant_id.is_(None), Account.landlord_id.is_(None)).order_by(Account.name).all()
+    return render_template('accounts.html', accounts=main_accounts)
 
 @main_bp.route('/account_transactions/<int:account_id>')
 @login_required
@@ -1009,7 +1008,7 @@ def company():
 def change_date():
     form = ChangeDateForm()
     if form.validate_on_submit():
-        new_date = form.new_date.data
+        new_date = form.date.data
         # Here you would add logic to handle the date change
         flash(f'Date changed to {new_date}.')
         return redirect(url_for('main.index'))
