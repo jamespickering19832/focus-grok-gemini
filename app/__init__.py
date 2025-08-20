@@ -52,8 +52,10 @@ def create_app():
         @login_manager.user_loader
         def load_user(user_id):
             return models.User.query.get(int(user_id))
-            return models.User.query.get(int(user_id))
 
+    @app.cli.command("init-db")
+    def init_db_command():
+        """Creates the default accounts."""
         from .models import Account
         def create_or_get_account(name, type_):
             account = Account.query.filter_by(name=name).first()
@@ -63,36 +65,16 @@ def create_app():
                 print(f'Created account: {name}')
             else:
                 print(f'Account already exists: {name}')
-            return account
-
-        # Create or get Bank Account
+        
         create_or_get_account('Master Bank Account', 'asset')
-
-        # Create or get Suspense Account
         create_or_get_account('Suspense Account', 'suspense')
-
-        # Create or get Agency Income Account
         create_or_get_account('Agency Income', 'agency_income')
-
-        # Create or get Agency Expense Account
         create_or_get_account('Agency Expense', 'agency_expense')
-
-        # Create or get Admin Fee Account
         create_or_get_account('Admin Fee Account', 'agency_income')
-
-        # Create or get VAT Payable Account
         create_or_get_account('VAT Account', 'vat_payable')
-
-        # Create or get Utility Account
         create_or_get_account('Utility Account', 'utility')
-
-        # Create or get Admin Fee Account
-        create_or_get_account('Admin Fee Account', 'agency_income')
-
-        # Create or get VAT Payable Account
-        create_or_get_account('VAT Account', 'vat_payable')
-
         db.session.commit()
+        print("Default accounts initialized.")
 
     @app.cli.command("recalculate-balances")
     def recalculate_balances_command():
