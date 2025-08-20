@@ -15,7 +15,7 @@ db = SQLAlchemy()
 migrate = Migrate()
 mail = Mail()
 login_manager = LoginManager()
-login_manager.login_view = 'login'
+login_manager.login_view = 'main.login'
 talisman = Talisman()
 limiter = Limiter(key_func=get_remote_address)
 
