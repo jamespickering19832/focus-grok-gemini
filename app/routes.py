@@ -53,15 +53,19 @@ def log_action(action, details=''):
     db.session.add(log)
     db.session.commit()
 
+@main_bp.route('/admin/recalculate-balances/<int:account_id>')
 @main_bp.route('/admin/recalculate-balances')
 @login_required
 @role_required('admin')
-def recalculate_balances():
+def recalculate_balances(account_id=None):
     """
     Temporary route to recalculate all account balances.
     """
     try:
-        accounts = Account.query.all()
+        if account_id:
+            accounts = [Account.query.get_or_404(account_id)]
+        else:
+            accounts = Account.query.all()
         
         for account in accounts:
             if account.name == 'Master Bank Account':
@@ -80,8 +84,8 @@ def recalculate_balances():
             account.balance = balance
 
         master_bank = Account.query.filter_by(name='Master Bank Account').first()
-        if master_bank:
-            total_bank_amount = db.session.query(func.sum(Transaction.amount)).scalar() or 0.0
+        if master_bank and (not account_id or master_bank.id == account_id):
+            total_bank_amount = db.session.query(func.sum(Transaction.amount)).filter(Transaction.account_id == master_bank.id).scalar() or 0.0
             master_bank.balance = total_bank_amount
 
         db.session.commit()
@@ -116,6 +120,7 @@ def upload_file():
             messages = process_csv(file_path)
             for message in messages:
                 flash(message)
+            recalculate_balances(account_id=Account.query.filter_by(name='Master Bank Account').first().id)
             return redirect(url_for('main.uncoded_transactions'))
     return render_template('upload.html', title='Upload CSV')
 
@@ -337,6 +342,8 @@ def allocate():
     transaction.status = 'coded'
     allocate_transaction(transaction)
     db.session.commit()
+    recalculate_balances(account_id=Account.query.filter_by(name='Master Bank Account').first().id)
+    recalculate_balances(account_id=transaction.account_id)
 
     flash('Transaction allocated successfully')
     return redirect(url_for('main.uncoded_transactions'))
@@ -485,10 +492,11 @@ def add_account():
 @main_bp.route('/delete_transaction_from_account/<int:transaction_id>', methods=['POST'])
 @login_required
 def delete_transaction_from_account(transaction_id):
-    transaction = Transaction.query.get_or_404(transaction_id)
+    transaction = Transaction.query.get_or_44(transaction_id)
     account_id = transaction.account_id
     db.session.delete(transaction)
     db.session.commit()
+    recalculate_balances(account_id=account_id)
     flash('Transaction deleted successfully!', 'success')
     return redirect(url_for('main.account_transactions', account_id=account_id))
 
@@ -728,8 +736,7 @@ def banking():
         return render_template('banking.html', transactions=None, balance=0, form=form, search='')
 
     query = Transaction.query.filter(
-        Transaction.account_id == bank_account.id,
-        Transaction.status != 'uncoded'
+        Transaction.account_id == bank_account.id
     )
 
     search_term = request.form.get('search', '')
@@ -746,10 +753,7 @@ def banking():
     
     transactions = query.order_by(Transaction.date.desc()).all()
     
-    balance = db.session.query(func.sum(Transaction.amount)).filter(
-        Transaction.account_id == bank_account.id,
-        Transaction.status != 'uncoded'
-    ).scalar() or 0.0
+    balance = bank_account.balance
 
     return render_template('banking.html', transactions=transactions, balance=balance, form=form, search=search_term)
 
@@ -757,8 +761,10 @@ def banking():
 @login_required
 def delete_transaction(transaction_id):
     transaction = Transaction.query.get_or_404(transaction_id)
+    account_id = transaction.account_id
     db.session.delete(transaction)
     db.session.commit()
+    recalculate_balances(account_id=account_id)
     flash('Transaction deleted successfully!', 'success')
     return redirect(url_for('main.banking'))
 
@@ -939,6 +945,8 @@ def add_manual_rent():
         db.session.add(transaction)
         allocate_transaction(transaction)
         db.session.commit()
+        recalculate_balances(account_id=bank_account.id)
+        recalculate_balances(account_id=transaction.tenant.accounts.first().id)
         flash('Manual rent payment added successfully.', 'success')
         return redirect(url_for('main.tenant_account', id=form.tenant_id.data))
     return render_template('add_manual_rent.html', form=form)
@@ -965,6 +973,8 @@ def add_manual_expense():
         db.session.add(transaction)
         allocate_transaction(transaction)
         db.session.commit()
+        recalculate_balances(account_id=bank_account.id)
+        recalculate_balances(account_id=transaction.landlord.accounts.first().id)
         flash('Manual expense added successfully.', 'success')
         return redirect(url_for('main.landlord_account', id=form.landlord_id.data))
     return render_template('add_manual_expense.html', form=form)

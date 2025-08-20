@@ -132,7 +132,6 @@ def allocate_transaction(transaction):
                 # No commission, full amount to landlord
                 landlord_account.update_balance(transaction.amount)
                 transaction.landlord_id = landlord.id # Associate transaction directly with landlord
-                transaction.account_id = landlord_account.id
 
         
 
@@ -144,7 +143,6 @@ def allocate_transaction(transaction):
         print(f"Landlord account balance BEFORE expense: {landlord_account.balance:.2f}")
         landlord_account.update_balance(transaction.amount) # transaction.amount is already negative for expenses
         print(f"Landlord account balance AFTER expense: {landlord_account.balance:.2f}")
-        transaction.account_id = landlord_account.id # Link expense transaction to landlord account
         print(f"Transaction {transaction.id}: Expense. Landlord account updated.")
 
     elif transaction.category == 'payment' and transaction.landlord_id:
@@ -155,7 +153,6 @@ def allocate_transaction(transaction):
         print(f"Landlord account balance BEFORE payment: {landlord_account.balance:.2f}")
         landlord_account.update_balance(-abs(transaction.amount)) # Payment to landlord reduces their balance
         print(f"Landlord account balance AFTER payment: {landlord_account.balance:.2f}")
-        transaction.account_id = landlord_account.id # Link payment transaction to landlord account
         print(f"Transaction {transaction.id}: Landlord payment. Landlord account updated.")
 
     elif transaction.category == 'payout' and transaction.landlord_id:
