@@ -55,12 +55,13 @@ def add_dummy_data():
         suspense_account = Account(name='Suspense Account', type='suspense')
         bank_account = Account(name='Master Bank Account', type='asset', balance=90000.0)
         utility_account = Account(name='Utility Account', type='utility')
+        vat_account = Account(name='VAT Account', type='vat_payable')
 
         db.session.add_all([
             account_tenant1, account_landlord1, account_tenant2, account_landlord2,
             account_tenant3, account_landlord3, agency_income_account, agency_expense_account,
             account_tenant4, account_landlord4,
-            suspense_account, bank_account, utility_account
+            suspense_account, bank_account, utility_account, vat_account
         ])
 
         category_maintenance = ExpenseCategory(name='Maintenance')

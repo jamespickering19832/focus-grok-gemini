@@ -5,25 +5,22 @@ from sqlalchemy import text
 def reset_database():
     app = create_app()
     with app.app_context():
-        # Drop all tables
+        cascade = ""
+        if db.engine.name == 'postgresql':
+            cascade = " CASCADE"
+
+        tables = [
+            "user_roles", "user", "role", "tenant", "landlord", "property",
+            "account", "transaction", "expense_category", "expense",
+            "allocation_history", "statement", "rent_charge_batch",
+            "audit_log", "company", "alembic_version"
+        ]
+
         with db.engine.connect() as connection:
             with connection.begin():
-                db.session.execute(text('DROP TABLE IF EXISTS "user_roles"'))
-                db.session.execute(text('DROP TABLE IF EXISTS "user"'))
-                db.session.execute(text('DROP TABLE IF EXISTS "role"'))
-                db.session.execute(text('DROP TABLE IF EXISTS "tenant"'))
-                db.session.execute(text('DROP TABLE IF EXISTS "landlord"'))
-                db.session.execute(text('DROP TABLE IF EXISTS "property"'))
-                db.session.execute(text('DROP TABLE IF EXISTS "account"'))
-                db.session.execute(text('DROP TABLE IF EXISTS "transaction"'))
-                db.session.execute(text('DROP TABLE IF EXISTS "expense_category"'))
-                db.session.execute(text('DROP TABLE IF EXISTS "expense"'))
-                db.session.execute(text('DROP TABLE IF EXISTS "allocation_history"'))
-                db.session.execute(text('DROP TABLE IF EXISTS "statement"'))
-                db.session.execute(text('DROP TABLE IF EXISTS "rent_charge_batch"'))
-                db.session.execute(text('DROP TABLE IF EXISTS "audit_log"'))
-                db.session.execute(text('DROP TABLE IF EXISTS "company"'))
-                db.session.execute(text('DROP TABLE IF EXISTS "alembic_version"'))
+                for table_name in tables:
+                    connection.execute(text(f'DROP TABLE IF EXISTS "{table_name}"{cascade}'))
+        
         print("All tables dropped.")
         
         # Create all tables
