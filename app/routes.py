@@ -509,7 +509,8 @@ def tenants():
 @login_required
 def tenant_details(id):
     tenant = Tenant.query.get_or_404(id)
-    return render_template('tenant_details.html', tenant=tenant)
+    property = tenant.property
+    return render_template('tenant_details.html', tenant=tenant, property=property)
 
 @main_bp.route('/add_tenant', methods=['GET', 'POST'])
 @login_required
@@ -578,7 +579,8 @@ def landlords():
 @login_required
 def landlord_details(id):
     landlord = Landlord.query.get_or_404(id)
-    return render_template('landlord_details.html', landlord=landlord)
+    properties = landlord.properties.all()
+    return render_template('landlord_details.html', landlord=landlord, properties=properties)
 
 @main_bp.route('/add_landlord', methods=['GET', 'POST'])
 @login_required
@@ -648,6 +650,29 @@ def add_property(landlord_id):
         flash('Property added successfully!', 'success')
         return redirect(url_for('main.landlord_details', id=landlord_id))
     return render_template('add_property.html', form=form, landlord_id=landlord_id)
+
+@main_bp.route('/edit_property/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_property(id):
+    property = Property.query.get_or_404(id)
+    form = EditPropertyForm(obj=property)
+    form.utility_account_id.choices = [(a.id, a.name) for a in Account.query.filter_by(type='utility').all()]
+    if form.validate_on_submit():
+        form.populate_obj(property)
+        db.session.commit()
+        flash('Property updated successfully!', 'success')
+        return redirect(url_for('main.landlord_details', id=property.landlord_id))
+    return render_template('edit_property.html', form=form, property=property)
+
+@main_bp.route('/delete_property/<int:id>', methods=['POST'])
+@login_required
+def delete_property(id):
+    property = Property.query.get_or_404(id)
+    landlord_id = property.landlord_id
+    db.session.delete(property)
+    db.session.commit()
+    flash('Property deleted successfully!', 'success')
+    return redirect(url_for('main.landlord_details', id=landlord_id))
 
 @main_bp.route('/landlord/<int:landlord_id>/payout', methods=['GET', 'POST'])
 @login_required
