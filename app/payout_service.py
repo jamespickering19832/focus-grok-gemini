@@ -35,6 +35,10 @@ def process_landlord_payout(landlord_id, start_date, end_date, vat_rate):
     
     final_transactions = [t for t in transactions if not (t.category == 'rent' and t.id in split_rent_ids)]
 
+    # Collect reference codes from all transactions involved in the payout
+    reference_codes = [t.reference_code for t in final_transactions if t.reference_code]
+    payout_reference = ', '.join(set(reference_codes))
+
     # Calculate rent income for commission calculation based on the landlord's actual share
     rent_income_for_commission = sum(t.amount for t in final_transactions if t.category == 'rent_landlord_share' or (t.category == 'rent' and t.id not in split_rent_ids))
 
@@ -56,8 +60,6 @@ def process_landlord_payout(landlord_id, start_date, end_date, vat_rate):
     vat_account = Account.query.filter_by(name='VAT Account').first()
     if not vat_account:
         raise ValueError("VAT account not found")
-
-    today = date.today()
 
     today = date.today()
 
@@ -87,7 +89,8 @@ def process_landlord_payout(landlord_id, start_date, end_date, vat_rate):
             category='fee',
             landlord_id=landlord.id,
             account_id=landlord_account.id,
-            status='allocated'
+            status='allocated',
+            reference_code=payout_reference
         ))
         db.session.add(Transaction(
             date=today,
@@ -96,7 +99,8 @@ def process_landlord_payout(landlord_id, start_date, end_date, vat_rate):
             category='vat',
             landlord_id=landlord.id,
             account_id=landlord_account.id,
-            status='allocated'
+            status='allocated',
+            reference_code=payout_reference
         ))
         db.session.add(Transaction(
             date=today,
@@ -105,7 +109,8 @@ def process_landlord_payout(landlord_id, start_date, end_date, vat_rate):
             category='payout',
             landlord_id=landlord.id,
             account_id=landlord_account.id,
-            status='allocated'
+            status='allocated',
+            reference_code=payout_reference
         ))
 
     # 2. Agency Income (only positive, NOT landlord account)
@@ -117,7 +122,8 @@ def process_landlord_payout(landlord_id, start_date, end_date, vat_rate):
             description='Agency Commission',
             category='fee',
             account_id=agency_income_account.id,
-            status='allocated'
+            status='allocated',
+            reference_code=payout_reference
         ))
 
     # 3. VAT (only positive, NOT landlord account)
@@ -129,7 +135,8 @@ def process_landlord_payout(landlord_id, start_date, end_date, vat_rate):
             description='VAT on Commission',
             category='vat',
             account_id=vat_account.id,
-            status='allocated'
+            status='allocated',
+            reference_code=payout_reference
         ))
 
     # 4. Landlord Payments (only negative, NOT landlord account)
@@ -142,7 +149,8 @@ def process_landlord_payout(landlord_id, start_date, end_date, vat_rate):
             category='payout',
             landlord_id=landlord.id,
             account_id=landlord_payments_account.id,
-            status='allocated'
+            status='allocated',
+            reference_code=payout_reference
         ))
 
     db.session.commit()
