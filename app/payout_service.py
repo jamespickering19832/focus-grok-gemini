@@ -3,6 +3,9 @@ from datetime import date
 from app import db
 from app.models import Landlord, Transaction, Account
 from app.accounting_service import allocate_transaction
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 def process_landlord_payout(landlord_id, start_date, end_date, vat_rate):
     landlord = Landlord.query.get(landlord_id)
@@ -12,8 +15,6 @@ def process_landlord_payout(landlord_id, start_date, end_date, vat_rate):
     landlord_account = Account.query.filter_by(landlord_id=landlord.id, type='landlord').first()
     if not landlord_account:
         raise ValueError("Landlord account not found")
-
-    
 
     # Get all transactions for the landlord within the specified date range to calculate the payout.
     transactions = Transaction.query.filter(
@@ -35,9 +36,8 @@ def process_landlord_payout(landlord_id, start_date, end_date, vat_rate):
     
     final_transactions = [t for t in transactions if not (t.category == 'rent' and t.id in split_rent_ids)]
 
-    # Collect reference codes from all transactions involved in the payout
-    reference_codes = [t.reference_code for t in final_transactions if t.reference_code]
-    payout_reference = ', '.join(set(reference_codes))
+    payout_reference = landlord.reference_code
+    logging.info(f"Payout reference for landlord {landlord_id}: {payout_reference}")
 
     # Calculate rent income for commission calculation based on the landlord's actual share
     rent_income_for_commission = sum(t.amount for t in final_transactions if t.category == 'rent_landlord_share' or (t.category == 'rent' and t.id not in split_rent_ids))
@@ -85,7 +85,7 @@ def process_landlord_payout(landlord_id, start_date, end_date, vat_rate):
         db.session.add(Transaction(
             date=today,
             amount=-agency_commission,
-            description='Agency Commission',
+            description=f'Agency Commission {payout_reference}',
             category='fee',
             landlord_id=landlord.id,
             account_id=landlord_account.id,
@@ -95,18 +95,8 @@ def process_landlord_payout(landlord_id, start_date, end_date, vat_rate):
         db.session.add(Transaction(
             date=today,
             amount=-vat_on_commission,
-            description='VAT on Commission',
+            description=f'VAT on Commission {payout_reference}',
             category='vat',
-            landlord_id=landlord.id,
-            account_id=landlord_account.id,
-            status='allocated',
-            reference_code=payout_reference
-        ))
-        db.session.add(Transaction(
-            date=today,
-            amount=-payout_amount,
-            description=f'Payout to {landlord.name}',
-            category='payout',
             landlord_id=landlord.id,
             account_id=landlord_account.id,
             status='allocated',
@@ -119,7 +109,7 @@ def process_landlord_payout(landlord_id, start_date, end_date, vat_rate):
         db.session.add(Transaction(
             date=today,
             amount=agency_commission,
-            description='Agency Commission',
+            description=f'Agency Commission {payout_reference}',
             category='fee',
             account_id=agency_income_account.id,
             status='allocated',
@@ -132,7 +122,7 @@ def process_landlord_payout(landlord_id, start_date, end_date, vat_rate):
         db.session.add(Transaction(
             date=today,
             amount=vat_on_commission,
-            description='VAT on Commission',
+            description=f'VAT on Commission {payout_reference}',
             category='vat',
             account_id=vat_account.id,
             status='allocated',
@@ -140,8 +130,9 @@ def process_landlord_payout(landlord_id, start_date, end_date, vat_rate):
         ))
 
     # 4. Landlord Payments (only negative, NOT landlord account)
-    landlord_payments_account = Account.query.filter((Account.type=='liability') | (Account.name=='Landlord Payments')).first()
+    landlord_payments_account = Account.query.filter_by(name='Landlord Payments').first()
     if landlord_payments_account:
+        landlord_payments_account.update_balance(-payout_amount)
         db.session.add(Transaction(
             date=today,
             amount=-payout_amount,

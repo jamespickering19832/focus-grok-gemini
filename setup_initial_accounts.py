@@ -16,10 +16,11 @@ def add_initial_accounts():
         bank_account = Account(name='Master Bank Account', type='asset', balance=90000.0)
         utility_account = Account(name='Utility Account', type='utility')
         vat_account = Account(name='VAT Account', type='vat_payable')
+        landlord_payments_account = Account(name='Landlord Payments', type='liability')
 
         db.session.add_all([
             agency_income_account, agency_expense_account,
-            suspense_account, bank_account, utility_account, vat_account
+            suspense_account, bank_account, utility_account, vat_account, landlord_payments_account
         ])
 
         db.session.commit()

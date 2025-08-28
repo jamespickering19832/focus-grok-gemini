@@ -45,6 +45,8 @@ class RegistrationForm(FlaskForm):
 class CompanyForm(FlaskForm):
     name = StringField('Company Name', validators=[DataRequired()])
     address = StringField('Company Address', validators=[DataRequired()])
+    phone = StringField('Phone Number', validators=[Optional()])
+    email = StringField('Email', validators=[Optional()])
     logo = FileField('Company Logo', validators=[FileAllowed(['jpg', 'png', 'gif'])])
     submit = SubmitField('Update Company Information')
 
@@ -59,6 +61,7 @@ class ManualRentForm(FlaskForm):
     amount = FloatField('Amount', validators=[DataRequired()])
     date = DateField('Date', format='%Y-%m-%d', validators=[DataRequired()])
     description = StringField('Description', validators=[DataRequired()])
+    reference_code = StringField('Reference Code', validators=[Optional()])
     submit = SubmitField('Add Rent Payment')
 
 class ManualExpenseForm(FlaskForm):
@@ -66,6 +69,7 @@ class ManualExpenseForm(FlaskForm):
     amount = FloatField('Amount', validators=[DataRequired()])
     date = DateField('Date', format='%Y-%m-%d', validators=[DataRequired()])
     description = StringField('Description', validators=[DataRequired()])
+    reference_code = StringField('Reference Code', validators=[Optional()])
     submit = SubmitField('Add Expense')
 
 class PayoutForm(FlaskForm):

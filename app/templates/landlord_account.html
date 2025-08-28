@@ -20,6 +20,7 @@
             <th>Description</th>
             <th>Category</th>
             <th>Reference</th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -36,6 +37,11 @@
             <td>{{ trans.description }}</td>
             <td>{{ trans.category }}</td>
             <td>{{ trans.reference_code }}</td>
+            <td>
+                <form action="{{ url_for('main.delete_transaction_from_account', transaction_id=trans.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this transaction?');" style="display:inline;">
+                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </form>
+            </td>
         </tr>
         {% endfor %}
     </tbody>

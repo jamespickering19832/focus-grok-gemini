@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Coded Transactions</h1>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Amount</th>
+                <th>Category</th>
+                <th>Tenant/Landlord</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for transaction in transactions %}
+            <tr>
+                <td>{{ transaction.date }}</td>
+                <td>{{ transaction.description }}</td>
+                <td>{{ transaction.amount }}</td>
+                <td>{{ transaction.category }}</td>
+                <td>
+                    {% if transaction.tenant %}
+                        {{ transaction.tenant.name }}
+                    {% elif transaction.landlord %}
+                        {{ transaction.landlord.name }}
+                    {% endif %}
+                </td>
+                <td>
+                    <form action="{{ url_for('main.mark_as_uncoded', transaction_id=transaction.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to mark this transaction as uncoded?');" style="display:inline;">
+                        <button type="submit" class="btn btn-warning btn-sm">Mark as Uncoded</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

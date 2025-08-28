@@ -48,6 +48,7 @@
                             <th>Amount</th>
                             <th>Status</th>
                             <th>Category</th>
+                            <th>Reference</th>
                             <th>Tenant/Landlord</th>
                             <th>Actions</th>
                         </tr>
@@ -60,6 +61,7 @@
                                 <td>£{{ transaction.amount|round(2) }}</td>
                                 <td>{{ transaction.status }}</td>
                                 <td>{{ transaction.category }}</td>
+                                <td>{{ transaction.reference_code }}</td>
                                 <td>
                                     {% if transaction.tenant %}
                                         {{ transaction.tenant.name }} (Tenant)

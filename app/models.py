@@ -187,6 +187,8 @@ class Company(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128))
     address = db.Column(db.String(256))
+    phone = db.Column(db.String(20))
+    email = db.Column(db.String(120))
     logo = db.Column(db.String(256))  # Path to logo file
 
     def __repr__(self):

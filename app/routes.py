@@ -491,13 +491,57 @@ def add_account():
 @main_bp.route('/delete_transaction_from_account/<int:transaction_id>', methods=['POST'])
 @login_required
 def delete_transaction_from_account(transaction_id):
-    transaction = Transaction.query.get_or_44(transaction_id)
+    transaction = Transaction.query.get_or_404(transaction_id)
     account_id = transaction.account_id
+    tenant_id = transaction.tenant_id
+    landlord_id = transaction.landlord_id
+
+    # Reverse amounts from other affected accounts if necessary
+    if transaction.category == 'fee':
+        agency_income_account = Account.query.filter_by(name='Agency Income').first()
+        if agency_income_account:
+            agency_income_account.update_balance(-transaction.amount) # Reverse the fee
+    elif transaction.category == 'vat':
+        vat_account = Account.query.filter_by(name='VAT Account').first()
+        if vat_account:
+            vat_account.update_balance(-transaction.amount) # Reverse the VAT
+    elif transaction.category == 'payout':
+        landlord_payments_account = Account.query.filter_by(name='Landlord Payments').first()
+        if landlord_payments_account:
+            landlord_payments_account.update_balance(-transaction.amount) # Reverse the payout
+
     db.session.delete(transaction)
     db.session.commit()
-    recalculate_balances(account_id=account_id)
+
+    if account_id:
+        recalculate_balances(account_id=account_id)
+    if tenant_id:
+        tenant_account = Account.query.filter_by(tenant_id=tenant_id).first()
+        if tenant_account:
+            recalculate_balances(account_id=tenant_account.id)
+    if landlord_id:
+        landlord_account = Account.query.filter_by(landlord_id=landlord_id).first()
+        if landlord_account:
+            recalculate_balances(account_id=landlord_account.id)
+
+    # Recalculate balances for other affected accounts
+    if transaction.category == 'fee':
+        recalculate_balances(account_id=Account.query.filter_by(name='Agency Income').first().id)
+    elif transaction.category == 'vat':
+        recalculate_balances(account_id=Account.query.filter_by(name='VAT Account').first().id)
+    elif transaction.category == 'payout':
+        recalculate_balances(account_id=Account.query.filter_by(name='Landlord Payments').first().id)
+
     flash('Transaction deleted successfully!', 'success')
-    return redirect(url_for('main.account_transactions', account_id=account_id))
+
+    if tenant_id:
+        return redirect(url_for('main.tenant_account', id=tenant_id))
+    elif landlord_id:
+        return redirect(url_for('main.landlord_account', id=landlord_id))
+    elif account_id:
+        return redirect(url_for('main.account_transactions', account_id=account_id))
+    else:
+        return redirect(url_for('main.banking'))
 
 @main_bp.route('/tenants')
 @login_required
@@ -709,8 +753,8 @@ def landlord_account(id):
         )
     )
 
-    # Filter out original rent transactions that have been split
-    all_transactions = transactions_query.order_by(Transaction.date.desc()).all()
+    # Filter out original rent transactions that have been split and rent_charge transactions
+    all_transactions = transactions_query.filter(Transaction.category != 'rent_charge').order_by(Transaction.date.desc()).all()
     
     final_transactions = []
     for t in all_transactions:
@@ -961,6 +1005,7 @@ def add_manual_rent():
             date=form.date.data,
             amount=form.amount.data,
             description=form.description.data,
+            reference_code=form.reference_code.data,
             category='rent',
             tenant_id=form.tenant_id.data,
             status='coded',
@@ -989,6 +1034,7 @@ def add_manual_expense():
             date=form.date.data,
             amount=-form.amount.data,
             description=form.description.data,
+            reference_code=form.reference_code.data,
             category='expense',
             landlord_id=form.landlord_id.data,
             status='coded',
@@ -1087,3 +1133,59 @@ def split_transaction(transaction_id):
     # Placeholder for split transaction functionality
     flash('Split transaction functionality is not yet implemented.', 'info')
     return redirect(url_for('main.uncoded_transactions'))
+
+@main_bp.route('/coded')
+@login_required
+def coded_transactions():
+    coded = Transaction.query.filter(
+        or_(Transaction.tenant_id.isnot(None), Transaction.landlord_id.isnot(None)),
+        Transaction.parent_transaction_id.is_(None)
+    ).order_by(Transaction.date.desc()).all()
+    return render_template('coded_transactions.html', transactions=coded)
+
+@main_bp.route('/mark_as_uncoded/<int:transaction_id>', methods=['POST'])
+@login_required
+def mark_as_uncoded(transaction_id):
+    transaction_to_uncode = Transaction.query.get_or_404(transaction_id)
+
+    # Determine the main transaction to process
+    main_transaction = transaction_to_uncode.parent_transaction or transaction_to_uncode
+
+    # Prevent uncoding if the landlord has been paid out
+    if main_transaction.tenant_id:
+        tenant = Tenant.query.get(main_transaction.tenant_id)
+        if tenant and tenant.property and tenant.property.landlord_id:
+            payouts = Transaction.query.filter_by(landlord_id=tenant.property.landlord_id, category='payout').all()
+            if any(p.date > main_transaction.date for p in payouts):
+                flash('Cannot uncode. Landlord has been paid out since this transaction.', 'danger')
+                return redirect(url_for('main.coded_transactions'))
+
+    # Reverse financial effects of child transactions and delete them
+    for child in main_transaction.child_transactions:
+        if child.landlord_id:
+            landlord_account = Account.query.filter_by(landlord_id=child.landlord_id).first()
+            if landlord_account:
+                landlord_account.update_balance(-child.amount)
+        if child.account_id:
+            # This handles agency fees, utility splits, etc.
+            account = Account.query.get(child.account_id)
+            if account and account.type != 'landlord': # Avoid double-counting landlord accounts
+                account.update_balance(-child.amount)
+        db.session.delete(child)
+
+    # Reverse financial effect on the tenant's account from the main transaction
+    if main_transaction.tenant_id:
+        tenant_account = Account.query.filter_by(tenant_id=main_transaction.tenant_id).first()
+        if tenant_account:
+            tenant_account.update_balance(-main_transaction.amount)
+
+    # Reset the main transaction to its original uncoded state
+    main_transaction.status = 'uncoded'
+    main_transaction.tenant_id = None
+    main_transaction.landlord_id = None
+    main_transaction.category = None
+    
+    db.session.commit()
+
+    flash('Transaction and all linked payments have been successfully marked as uncoded.', 'success')
+    return redirect(url_for('main.coded_transactions'))
