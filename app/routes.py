@@ -1142,14 +1142,32 @@ def split_transaction(transaction_id):
     flash('Split transaction functionality is not yet implemented.', 'info')
     return redirect(url_for('main.uncoded_transactions'))
 
-@main_bp.route('/coded')
+@main_bp.route('/coded', methods=['GET', 'POST'])
 @login_required
 def coded_transactions():
-    coded = Transaction.query.filter(
+    form = DateRangeForm()
+    query = Transaction.query.filter(
         or_(Transaction.tenant_id.isnot(None), Transaction.landlord_id.isnot(None)),
-        Transaction.parent_transaction_id.is_(None)
-    ).order_by(Transaction.date.desc()).all()
-    return render_template('coded_transactions.html', transactions=coded)
+        Transaction.parent_transaction_id.is_(None),
+        Transaction.category.notin_(['rent_charge', 'fee', 'vat', 'payout'])
+    )
+
+    search_term = ''
+    if request.method == 'POST':
+        search_term = request.form.get('search', '')
+        if form.validate_on_submit():
+            start_date = form.start_date.data
+            end_date = form.end_date.data
+            
+            if start_date:
+                query = query.filter(Transaction.date >= start_date)
+            if end_date:
+                query = query.filter(Transaction.date <= end_date)
+        if search_term:
+            query = query.filter(Transaction.description.ilike(f'%{search_term}%'))
+
+    coded = query.order_by(Transaction.date.desc()).all()
+    return render_template('coded_transactions.html', transactions=coded, form=form, search=search_term)
 
 @main_bp.route('/mark_as_uncoded/<int:transaction_id>', methods=['POST'])
 @login_required

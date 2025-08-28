@@ -2,6 +2,23 @@
 
 {% block content %}
     <h1>Coded Transactions</h1>
+
+    <form method="POST" action="{{ url_for('main.coded_transactions') }}" class="form-inline mb-3">
+        {{ form.hidden_tag() }}
+        <div class="form-group mr-2">
+            {{ form.start_date.label(class="mr-2") }}
+            {{ form.start_date(class="form-control") }}
+        </div>
+        <div class="form-group mr-2">
+            {{ form.end_date.label(class="mr-2") }}
+            {{ form.end_date(class="form-control") }}
+        </div>
+        <div class="form-group mr-2">
+            <input type="text" name="search" class="form-control" placeholder="Search description..." value="{{ search }}">
+        </div>
+        <button type="submit" class="btn btn-primary">Filter</button>
+    </form>
+
     <table class="table">
         <thead>
             <tr>
