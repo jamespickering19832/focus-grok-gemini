@@ -733,6 +733,14 @@ def landlord_payout(landlord_id):
         except ValueError as e:
             flash(str(e), 'danger')
         return redirect(url_for('main.landlord_account', id=landlord_id))
+    
+    if request.method == 'GET':
+        today = date.today()
+        first_day_of_month = today.replace(day=1)
+        last_day_of_month = first_day_of_month.replace(day=calendar.monthrange(today.year, today.month)[1])
+        form.start_date.data = first_day_of_month
+        form.end_date.data = last_day_of_month
+
     return render_template('landlord_payout.html', form=form, landlord=landlord)
 
 @main_bp.route('/landlord/<int:id>/account')
