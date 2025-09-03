@@ -8,12 +8,12 @@ from app.forms import (
     AddTenantForm, AddLandlordForm, AddPropertyForm, EditTenantForm, DeleteTenantForm,
     EditLandlordForm, DeleteLandlordForm, EditPropertyForm, DeletePropertyForm,
     PayoutForm, DateRangeForm, CompanyForm, EditUserForm, AddAccountForm,
-    StatementGenerationForm
+    StatementGenerationForm, AddLandlordReferenceForm
 )
 from flask_login import current_user, login_user, logout_user, login_required
 from app.models import (
     User, Transaction, Tenant, Landlord, Property, Account, AllocationHistory,
-    Statement, AuditLog, Expense, RentChargeBatch, Company, Role
+    Statement, AuditLog, Expense, RentChargeBatch, Company, Role, LandlordReference
 )
 from werkzeug.utils import secure_filename
 import os
@@ -221,12 +221,14 @@ def match_transaction(transaction):
                 transaction.category = 'rent'
                 return True, 'tenant', tenant.id
         for landlord in landlords:
-            if landlord.reference_code and normalized_trans_ref == ''.join(landlord.reference_code.upper().split()):
-                if transaction.amount > 0:
-                    transaction.category = 'payment'
-                else:
-                    transaction.category = 'expense'
-                return True, 'landlord', landlord.id
+            all_refs = [landlord.reference_code] + [ref.reference_code for ref in landlord.references]
+            for ref_code in all_refs:
+                if ref_code and normalized_trans_ref == ''.join(ref_code.upper().split()):
+                    if transaction.amount > 0:
+                        transaction.category = 'payment'
+                    else:
+                        transaction.category = 'expense'
+                    return True, 'landlord', landlord.id
 
     if transaction.amount > 0:
         for tenant in tenants:
@@ -258,15 +260,17 @@ def match_transaction(transaction):
                 return True, 'tenant', tenant.id
 
     for landlord in landlords:
-        if landlord.reference_code:
-            ref_norm = ''.join(landlord.reference_code.upper().split())
-            ref_score = get_partial_ratio(text, ref_norm)
-            if ref_score >= 85:
-                if transaction.amount > 0:
-                    transaction.category = 'payment'
-                else:
-                    transaction.category = 'expense'
-                return True, 'landlord', landlord.id
+        all_refs = [landlord.reference_code] + [ref.reference_code for ref in landlord.references]
+        for ref_code in all_refs:
+            if ref_code:
+                ref_norm = ''.join(ref_code.upper().split())
+                ref_score = get_partial_ratio(text, ref_norm)
+                if ref_score >= 85:
+                    if transaction.amount > 0:
+                        transaction.category = 'payment'
+                    else:
+                        transaction.category = 'expense'
+                    return True, 'landlord', landlord.id
         if landlord.name:
             name_norm = ''.join(landlord.name.upper().split())
             name_score = get_partial_ratio(text, name_norm)
@@ -308,10 +312,12 @@ def get_suggestions(transaction):
             if name_score >= 85:
                 suggestions.append(('landlord', landlord.id, f"Landlord: {landlord.name} (Name Match: {name_score:.2f}%)"))
         if landlord.reference_code:
-            ref_norm = ''.join(landlord.reference_code.upper().split())
-            ref_score = get_partial_ratio(text, ref_norm)
-            if ref_score >= 85:
-                suggestions.append(('landlord', landlord.id, f"Landlord: {landlord.name} (Ref Match: {ref_score:.2f}%)"))
+            all_refs = [landlord.reference_code] + [ref.reference_code for ref in landlord.references]
+            for ref_code in all_refs:
+                ref_norm = ''.join(ref_code.upper().split())
+                ref_score = get_partial_ratio(text, ref_norm)
+                if ref_score >= 85:
+                    suggestions.append(('landlord', landlord.id, f"Landlord: {landlord.name} (Ref Match: {ref_score:.2f}%)"))
 
     return suggestions
 
@@ -624,7 +630,9 @@ def landlords():
 def landlord_details(id):
     landlord = Landlord.query.get_or_404(id)
     properties = landlord.properties.all()
-    return render_template('landlord_details.html', landlord=landlord, properties=properties)
+    references = landlord.references.all()
+    form = AddLandlordReferenceForm()
+    return render_template('landlord_details.html', landlord=landlord, properties=properties, references=references, form=form)
 
 @main_bp.route('/add_landlord', methods=['GET', 'POST'])
 @login_required
@@ -677,6 +685,31 @@ def delete_landlord(id):
     db.session.commit()
     flash('Landlord deleted successfully!', 'success')
     return redirect(url_for('main.landlords'))
+
+@main_bp.route('/landlord/<int:landlord_id>/add_reference', methods=['POST'])
+@login_required
+def add_landlord_reference(landlord_id):
+    form = AddLandlordReferenceForm()
+    if form.validate_on_submit():
+        reference = LandlordReference(
+            reference_code=form.reference_code.data,
+            landlord_id=landlord_id
+        )
+        db.session.add(reference)
+        db.session.commit()
+        flash('Reference added successfully!', 'success')
+    return redirect(url_for('main.landlord_details', id=landlord_id))
+
+@main_bp.route('/landlord/delete_reference/<int:reference_id>', methods=['POST'])
+@login_required
+def delete_landlord_reference(reference_id):
+    reference = LandlordReference.query.get_or_404(reference_id)
+    landlord_id = reference.landlord_id
+    db.session.delete(reference)
+    db.session.commit()
+    flash('Reference deleted successfully!', 'success')
+    return redirect(url_for('main.landlord_details', id=landlord_id))
+
 
 @main_bp.route('/add_property/<int:landlord_id>', methods=['GET', 'POST'])
 @login_required

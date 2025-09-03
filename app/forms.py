@@ -129,6 +129,11 @@ class EditLandlordForm(FlaskForm):
 class DeleteLandlordForm(FlaskForm):
     submit = SubmitField('Delete Landlord')
 
+class AddLandlordReferenceForm(FlaskForm):
+    reference_code = StringField('Reference Code', validators=[DataRequired()])
+    submit = SubmitField('Add Reference')
+
+
 class EditTenantForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired()])

@@ -67,9 +67,18 @@ class Landlord(db.Model):
     properties = db.relationship('Property', backref='landlord', lazy='dynamic')
     accounts = db.relationship('Account', backref='landlord', lazy='dynamic')
     transactions = db.relationship('Transaction', backref='landlord_transaction', lazy='dynamic')
+    references = db.relationship('LandlordReference', backref='landlord', lazy='dynamic')
 
     def __repr__(self):
         return f'<Landlord {self.name}>'
+
+class LandlordReference(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    reference_code = db.Column(db.String(64), unique=True, index=True)
+    landlord_id = db.Column(db.Integer, db.ForeignKey('landlord.id'))
+
+    def __repr__(self):
+        return f'<LandlordReference {self.reference_code}>'
 
 class Property(db.Model):
     id = db.Column(db.Integer, primary_key=True)

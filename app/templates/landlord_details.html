@@ -57,4 +57,40 @@
 {% else %}
 <p>No properties associated with this landlord.</p>
 {% endif %}
+
+<h2 class="mt-4">References</h2>
+<form method="POST" action="{{ url_for('main.add_landlord_reference', landlord_id=landlord.id) }}">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        {{ form.reference_code.label }}
+        {{ form.reference_code(class="form-control") }}
+    </div>
+    <button type="submit" class="btn btn-primary">Add Reference</button>
+</form>
+<br>
+{% if references %}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Reference Code</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for ref in references %}
+        <tr>
+            <td>{{ ref.reference_code }}</td>
+            <td>
+                <form action="{{ url_for('main.delete_landlord_reference', reference_id=ref.id) }}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this reference?');">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No additional references for this landlord.</p>
+{% endif %}
+
 {% endblock %}
