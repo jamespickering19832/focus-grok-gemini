@@ -3,34 +3,33 @@
 {% block title %}Edit Property{% endblock %}
 
 {% block content %}
-<h1 class="mt-4">Edit Property: {{ property.address }}</h1>
+<h1 class="mt-4">Edit Property: {{ property.address_line_1 }}, {{ property.town }}, {{ property.postcode }}</h1>
 <form method="post">
     {{ form.hidden_tag() }}
     <div class="form-group">
-        {{ form.address.label(class="form-label") }}
-        {{ form.address(class="form-control") }}
+        {{ form.address_line_1.label(class="form-label") }}
+        {{ form.address_line_1(class="form-control") }}
     </div>
-    <p>
-            {{ form.rent_amount.label }}<br>
-            {{ form.rent_amount(size=16) }}<br>
-            {% for error in form.rent_amount.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-            {% endfor %}
-        </p>
-        <p>
-            {{ form.landlord_portion.label }}<br>
-            {{ form.landlord_portion(size=16) }}<br>
-            {% for error in form.landlord_portion.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-            {% endfor %}
-        </p>
-        <p>
-            {{ form.utility_account_id.label }}<br>
-            {{ form.utility_account_id() }}<br>
-            {% for error in form.utility_account_id.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-            {% endfor %}
-        </p>
-        <p>{{ form.submit() }}</p>
+    <div class="form-group">
+        {{ form.town.label(class="form-label") }}
+        {{ form.town(class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.postcode.label(class="form-label") }}
+        {{ form.postcode(class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.rent_amount.label }}
+        {{ form.rent_amount(class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.landlord_portion.label }}
+        {{ form.landlord_portion(class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.utility_account_id.label }}
+        {{ form.utility_account_id(class="form-control") }}
+    </div>
+    <p>{{ form.submit(class="btn btn-primary") }}</p>
 </form>
 {% endblock %}

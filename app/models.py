@@ -55,7 +55,9 @@ class Landlord(db.Model):
     name = db.Column(db.String(64), index=True)
     email = db.Column(db.String(120), index=True)
     phone_number = db.Column(db.String(20))
-    address = db.Column(db.String(256))
+    address_line_1 = db.Column(db.String(128))
+    town = db.Column(db.String(128))
+    postcode = db.Column(db.String(20))
     bank_name = db.Column(db.String(128))
     bank_account_number = db.Column(db.String(30))
     bank_sort_code = db.Column(db.String(10))
@@ -71,7 +73,9 @@ class Landlord(db.Model):
 
 class Property(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    address = db.Column(db.String(256))
+    address_line_1 = db.Column(db.String(128))
+    town = db.Column(db.String(128))
+    postcode = db.Column(db.String(20))
     rent_amount = db.Column(db.Float, default=0.0)  # Monthly rent amount
     landlord_id = db.Column(db.Integer, db.ForeignKey('landlord.id'))
     landlord_portion = db.Column(db.Float, nullable=True)
@@ -80,7 +84,7 @@ class Property(db.Model):
     expenses = db.relationship('Expense', backref='property', lazy='dynamic')
 
     def __repr__(self):
-        return f'<Property {self.address}>'
+        return f'<Property {self.address_line_1}, {self.town}, {self.postcode}>'
 
 class Account(db.Model):
     id = db.Column(db.Integer, primary_key=True)

@@ -5,8 +5,16 @@
     <form method="POST">
         {{ form.hidden_tag() }}
         <div class="form-group">
-            {{ form.address.label }}
-            {{ form.address(class="form-control") }}
+            {{ form.address_line_1.label }}
+            {{ form.address_line_1(class="form-control") }}
+        </div>
+        <div class="form-group">
+            {{ form.town.label }}
+            {{ form.town(class="form-control") }}
+        </div>
+        <div class="form-group">
+            {{ form.postcode.label }}
+            {{ form.postcode(class="form-control") }}
         </div>
         <div class="form-group">
             {{ form.rent_amount.label }}

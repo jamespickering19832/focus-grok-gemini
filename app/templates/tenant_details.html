@@ -10,7 +10,7 @@
 <p>Start Date: {{ tenant.start_date }}</p>
 <p>Reference Code: {{ tenant.reference_code }}</p>
 {% if property %}
-<p>Property: <a href="{{ url_for('main.landlord_details', id=property.landlord.id) }}">{{ property.address }}</a></p>
+<p>Property: <a href="{{ url_for('main.landlord_details', id=property.landlord.id) }}">{{ property.address_line_1 }}, {{ property.town }}, {{ property.postcode }}</a></p>
 {% else %}
 <p>No property assigned.</p>
 {% endif %}

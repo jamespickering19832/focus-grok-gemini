@@ -1,5 +1,6 @@
 
-from datetime import date
+from datetime import date, datetime
+from flask import session
 from app import db
 from app.models import Landlord, Transaction, Account
 from app.accounting_service import allocate_transaction
@@ -61,7 +62,10 @@ def process_landlord_payout(landlord_id, start_date, end_date, vat_rate):
     if not vat_account:
         raise ValueError("VAT account not found")
 
-    today = date.today()
+    if 'current_date' in session:
+        today = datetime.strptime(session['current_date'], '%Y-%m-%d').date()
+    else:
+        today = date.today()
 
     # Get all the necessary accounts
     bank_account = Account.query.filter_by(name='Master Bank Account').first()

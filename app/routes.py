@@ -1,6 +1,6 @@
 # app/routes.py
 from functools import wraps
-from flask import render_template, flash, redirect, url_for, request, jsonify, Blueprint, send_from_directory, current_app
+from flask import render_template, flash, redirect, url_for, request, jsonify, Blueprint, send_from_directory, current_app, session
 from urllib.parse import urlsplit
 from . import db
 from app.forms import (
@@ -419,7 +419,7 @@ def generate_rent_charges():
                 rent_charge = Transaction(
                     date=charge_date,
                     amount=-abs(tenant.property.rent_amount),
-                    description=f'Monthly rent for {tenant.property.address}',
+                    description=f'Monthly rent for {tenant.property.address_line_1}, {tenant.property.town}, {tenant.property.postcode}',
                     category='rent_charge',
                     tenant_id=tenant.id,
                     status='coded',
@@ -560,7 +560,7 @@ def tenant_details(id):
 @login_required
 def add_tenant():
     form = AddTenantForm()
-    form.property_id.choices = [(p.id, p.address) for p in Property.query.all()]
+    form.property_id.choices = [(p.id, f'{p.address_line_1}, {p.town}, {p.postcode}') for p in Property.query.all()]
     if form.validate_on_submit():
         try:
             tenant = Tenant(
@@ -596,7 +596,7 @@ def tenant_account(id):
 def edit_tenant(id):
     tenant = Tenant.query.get_or_404(id)
     form = EditTenantForm(obj=tenant)
-    form.property_id.choices = [(p.id, p.address) for p in Property.query.all()]
+    form.property_id.choices = [(p.id, f'{p.address_line_1}, {p.town}, {p.postcode}') for p in Property.query.all()]
     if form.validate_on_submit():
         form.populate_obj(tenant)
         db.session.commit()
@@ -636,7 +636,9 @@ def add_landlord():
                 name=form.name.data,
                 email=form.email.data,
                 phone_number=form.phone_number.data,
-                address=form.address.data,
+                address_line_1=form.address_line_1.data,
+                town=form.town.data,
+                postcode=form.postcode.data,
                 bank_name=form.bank_name.data,
                 bank_account_number=form.bank_account_number.data,
                 bank_sort_code=form.bank_sort_code.data,
@@ -683,7 +685,9 @@ def add_property(landlord_id):
     form.utility_account_id.choices = [(a.id, a.name) for a in Account.query.filter_by(type='utility').all()]
     if form.validate_on_submit():
         property = Property(
-            address=form.address.data,
+            address_line_1=form.address_line_1.data,
+            town=form.town.data,
+            postcode=form.postcode.data,
             rent_amount=form.rent_amount.data,
             landlord_portion=form.landlord_portion.data,
             landlord_id=landlord_id,
@@ -1088,7 +1092,7 @@ def change_date():
     form = ChangeDateForm()
     if form.validate_on_submit():
         new_date = form.date.data
-        # Here you would add logic to handle the date change
+        session['current_date'] = new_date.strftime('%Y-%m-%d')
         flash(f'Date changed to {new_date}.')
         return redirect(url_for('main.index'))
     return render_template('change_date.html', form=form)

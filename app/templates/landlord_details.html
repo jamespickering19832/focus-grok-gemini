@@ -6,7 +6,7 @@
 <h1 class="mt-4">{{ landlord.name }}</h1>
 <p>Email: {{ landlord.email }}</p>
 <p>Phone: {{ landlord.phone_number }}</p>
-<p>Address: {{ landlord.address }}</p>
+<p>Address: {{ landlord.address_line_1 }}, {{ landlord.town }}, {{ landlord.postcode }}</p>
 <p>Bank Name: {{ landlord.bank_name }}</p>
 <p>Bank Account Number: {{ landlord.bank_account_number }}</p>
 <p>Bank Sort Code: {{ landlord.bank_sort_code }}</p>
@@ -35,7 +35,7 @@
     <tbody>
         {% for prop in properties %}
         <tr>
-            <td>{{ prop.address }}</td>
+            <td>{{ prop.address_line_1 }}, {{ prop.town }}, {{ prop.postcode }}</td>
             <td>{{ prop.rent_amount }}</td>
             <td>
                 {% for t in prop.tenants.all() %}

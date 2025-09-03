@@ -101,7 +101,9 @@ class AddLandlordForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired()])
     phone_number = StringField('Phone Number', validators=[Optional()])
-    address = StringField('Address', validators=[Optional()])
+    address_line_1 = StringField('Address Line 1', validators=[Optional()])
+    town = StringField('Town', validators=[Optional()])
+    postcode = StringField('Postcode', validators=[Optional()])
     bank_name = StringField('Bank Name', validators=[Optional()])
     bank_account_number = StringField('Bank Account Number', validators=[Optional()])
     bank_sort_code = StringField('Bank Sort Code', validators=[Optional()])
@@ -113,7 +115,9 @@ class EditLandlordForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired()])
     phone_number = StringField('Phone Number', validators=[Optional()])
-    address = StringField('Address', validators=[Optional()])
+    address_line_1 = StringField('Address Line 1', validators=[Optional()])
+    town = StringField('Town', validators=[Optional()])
+    postcode = StringField('Postcode', validators=[Optional()])
     bank_name = StringField('Bank Name', validators=[Optional()])
     bank_account_number = StringField('Bank Account Number', validators=[Optional()])
     bank_sort_code = StringField('Bank Sort Code', validators=[Optional()])
@@ -138,7 +142,9 @@ class DeleteTenantForm(FlaskForm):
     submit = SubmitField('Delete Tenant')
 
 class AddPropertyForm(FlaskForm):
-    address = StringField('Address', validators=[DataRequired()])
+    address_line_1 = StringField('Address Line 1', validators=[DataRequired()])
+    town = StringField('Town', validators=[DataRequired()])
+    postcode = StringField('Postcode', validators=[DataRequired()])
     rent_amount = FloatField('Rent Amount', validators=[DataRequired()])
     landlord_portion = FloatField('Landlord Portion', default=1.0, validators=[DataRequired(), NumberRange(min=0.0, max=1.0)])
     utility_account_id = SelectField('Utility Account', coerce=int, validators=[Optional()])
@@ -146,7 +152,9 @@ class AddPropertyForm(FlaskForm):
     submit = SubmitField('Add Property')
 
 class EditPropertyForm(FlaskForm):
-    address = StringField('Address', validators=[DataRequired()])
+    address_line_1 = StringField('Address Line 1', validators=[DataRequired()])
+    town = StringField('Town', validators=[DataRequired()])
+    postcode = StringField('Postcode', validators=[DataRequired()])
     rent_amount = FloatField('Rent Amount', validators=[DataRequired()])
     landlord_portion = FloatField('Landlord Portion', validators=[DataRequired(), NumberRange(min=0.0, max=1.0)])
     utility_account_id = SelectField('Utility Account', coerce=int, validators=[Optional()])
