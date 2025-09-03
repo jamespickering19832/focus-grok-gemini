@@ -12,7 +12,7 @@
                     <div class="card-body">
                         <h5 class="card-title">{{ account.name }}</h5>
                         <p class="card-text">Type: {{ account.type }}</p>
-                        <p class="card-text">Balance: £{{ account.balance|round(2) }}</p>
+                        <td>{{ account.balance|round(2) }}</td>
                         <a href="{{ url_for('main.account_transactions', account_id=account.id) }}" class="btn btn-primary">View Transactions</a>
                     </div>
                 </div>

@@ -6,6 +6,7 @@
 {% block content %}
 <h1 class="mt-4">Tenants</h1>
 <a href="{{ url_for('main.add_tenant') }}" class="btn btn-primary mb-3">Add New Tenant</a>
+<a href="{{ url_for('main.archived_tenants') }}" class="btn btn-secondary mb-3">View Archived Tenants</a>
 <form method="get" class="form-inline mb-3">
     <input type="text" name="search" class="form-control mr-2" value="{{ search }}" placeholder="Search tenants...">
     <input type="submit" class="btn btn-secondary" value="Search">

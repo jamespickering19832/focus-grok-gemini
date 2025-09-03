@@ -35,7 +35,7 @@
             <tr>
                 <td>{{ transaction.date }}</td>
                 <td>{{ transaction.description }}</td>
-                <td>{{ transaction.amount }}</td>
+                                                <td>{{ transaction.amount|round(2) }}</td>
                 <td>{{ transaction.category }}</td>
                 <td>
                     {% if transaction.tenant %}

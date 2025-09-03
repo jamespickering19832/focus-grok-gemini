@@ -20,7 +20,7 @@
         {% for trans, suggestions in transactions_with_suggestions %}
         <tr>
             <td>{{ trans.date }}</td>
-            <td>{{ trans.amount }}</td>
+            <td>{{ trans.amount|round(2) }}</td>
             <td>{{ trans.description }}</td>
             <td>{{ trans.reference_code }}</td>
             <td>

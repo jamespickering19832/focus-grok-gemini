@@ -552,7 +552,7 @@ def delete_transaction_from_account(transaction_id):
 @main_bp.route('/tenants')
 @login_required
 def tenants():
-    tenants = Tenant.query.all()
+    tenants = Tenant.query.filter_by(is_archived=False).all()
     return render_template('tenants.html', tenants=tenants)
 
 @main_bp.route('/tenant_details/<int:id>')
@@ -574,6 +574,7 @@ def add_tenant():
                 email=form.email.data,
                 phone_number=form.phone_number.data,
                 start_date=form.start_date.data,
+                end_date=form.end_date.data,
                 reference_code=form.reference_code.data,
                 property_id=form.property_id.data
             )
@@ -618,6 +619,68 @@ def delete_tenant(id):
     db.session.commit()
     flash('Tenant deleted successfully!', 'success')
     return redirect(url_for('main.tenants'))
+
+@main_bp.route('/archive_tenant/<int:id>', methods=['POST'])
+@login_required
+def archive_tenant(id):
+    tenant = Tenant.query.get_or_404(id)
+    tenant.is_archived = True
+    db.session.commit()
+    flash('Tenant archived successfully!', 'success')
+    return redirect(url_for('main.tenants'))
+
+@main_bp.route('/unarchive_tenant/<int:id>', methods=['POST'])
+@login_required
+def unarchive_tenant(id):
+    tenant = Tenant.query.get_or_404(id)
+    tenant.is_archived = False
+    db.session.commit()
+    flash('Tenant unarchived successfully!', 'success')
+    return redirect(url_for('main.archived_tenants'))
+
+@main_bp.route('/delete_tenant_permanently/<int:id>', methods=['POST'])
+@login_required
+def delete_tenant_permanently(id):
+    tenant = Tenant.query.get_or_404(id)
+    db.session.delete(tenant)
+    db.session.commit()
+    flash('Tenant permanently deleted successfully!', 'success')
+    return redirect(url_for('main.archived_tenants'))
+
+@main_bp.route('/archived_tenants')
+@login_required
+def archived_tenants():
+    tenants = Tenant.query.filter_by(is_archived=True).all()
+    return render_template('archived_tenants.html', tenants=tenants)
+
+@main_bp.route('/generate_final_rent/<int:id>', methods=['POST'])
+@login_required
+def generate_final_rent(id):
+    tenant = Tenant.query.get_or_404(id)
+    if not tenant.end_date:
+        flash('Tenant has no end date set.', 'danger')
+        return redirect(url_for('main.tenant_details', id=id))
+
+    rent_amount = tenant.property.rent_amount
+    days_in_month = calendar.monthrange(tenant.end_date.year, tenant.end_date.month)[1]
+    active_days = tenant.end_date.day
+    prorated_rent = (rent_amount / days_in_month) * active_days
+
+    rent_charge = Transaction(
+        date=tenant.end_date,
+        amount=-abs(prorated_rent),
+        description=f'Final rent charge for {tenant.name}',
+        category='rent_charge',
+        tenant_id=tenant.id,
+        status='coded'
+    )
+    db.session.add(rent_charge)
+    allocate_transaction(rent_charge)
+    db.session.commit()
+
+    flash(f'Final rent charge of {prorated_rent:.2f} generated for {tenant.name}.')
+    return redirect(url_for('main.tenant_details', id=id))
+
 
 @main_bp.route('/landlords')
 @login_required

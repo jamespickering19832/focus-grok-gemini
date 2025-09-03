@@ -42,6 +42,8 @@ class Tenant(db.Model):
     email = db.Column(db.String(120), index=True)
     phone_number = db.Column(db.String(20))
     start_date = db.Column(db.Date)
+    end_date = db.Column(db.Date)
+    is_archived = db.Column(db.Boolean, default=False)
     reference_code = db.Column(db.String(64), unique=True, index=True)
     property_id = db.Column(db.Integer, db.ForeignKey('property.id'))
     accounts = db.relationship('Account', backref='tenant', lazy='dynamic')

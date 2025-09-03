@@ -11,7 +11,7 @@
 <p>Bank Account Number: {{ landlord.bank_account_number }}</p>
 <p>Bank Sort Code: {{ landlord.bank_sort_code }}</p>
 <p>Reference Code: {{ landlord.reference_code }}</p>
-<p>Commission Rate: {{ landlord.commission_rate }}</p>
+<p>Commission Rate: {{ landlord.commission_rate|round(2) }}</p>
 
 <a href="{{ url_for('main.landlord_account', id=landlord.id) }}" class="btn btn-primary">View Account</a>
 <a href="{{ url_for('main.statements') }}?landlord_id={{ landlord.id }}" class="btn btn-secondary">Generate Statement</a>
@@ -36,7 +36,7 @@
         {% for prop in properties %}
         <tr>
             <td>{{ prop.address_line_1 }}, {{ prop.town }}, {{ prop.postcode }}</td>
-            <td>{{ prop.rent_amount }}</td>
+            <td>{{ prop.rent_amount|round(2) }}</td>
             <td>
                 {% for t in prop.tenants.all() %}
                 {{ t.name }}<br>

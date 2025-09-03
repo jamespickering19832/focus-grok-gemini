@@ -23,7 +23,7 @@
             {% for trans in transactions %}
             <tr>
                 <td>{{ trans.date }}</td>
-                <td>{{ trans.amount }}</td>
+                            <td>{{ transaction.amount|round(2) }}</td>
                 <td>{{ trans.description }}</td>
                 <td>{{ trans.category }}</td>
                 <td>{{ trans.reference_code }}</td>

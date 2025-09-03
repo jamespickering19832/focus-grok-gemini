@@ -7,7 +7,7 @@
 <h1 class="mt-4">{{ landlord.name }} Account</h1>
 <div class="card">
     <div class="card-body">
-        <p><strong>Balance:</strong> {{ balance }}</p>
+                <h2>Balance: {{ balance|round(2) }}</h2>
         <a href="{{ url_for('main.landlord_payout', landlord_id=landlord.id) }}" class="btn btn-primary">Process Payout</a>
     </div>
 </div>
@@ -29,9 +29,9 @@
             <td>{{ trans.date }}</td>
             <td>
                 {% if trans.category == 'expense' or trans.category == 'payment' %}
-                    {{ trans.amount }}
+                    {{ trans.amount|round(2) }}
                 {% else %}
-                    {{ trans.amount }}
+                    {{ trans.amount|round(2) }}
                 {% endif %}
             </td>
             <td>{{ trans.description }}</td>

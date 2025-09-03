@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Archived Tenants{% endblock %}
+
+{% block content %}
+<h1 class="mt-4">Archived Tenants</h1>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Reference Code</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for tenant in tenants %}
+        <tr>
+            <td>{{ tenant.name }}</td>
+            <td>{{ tenant.email }}</td>
+            <td>{{ tenant.reference_code }}</td>
+            <td>
+                <form action="{{ url_for('main.unarchive_tenant', id=tenant.id) }}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-success btn-sm">Unarchive</button>
+                </form>
+                <form action="{{ url_for('main.delete_tenant_permanently', id=tenant.id) }}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to permanently delete this tenant? This action cannot be undone.');">Delete Permanently</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

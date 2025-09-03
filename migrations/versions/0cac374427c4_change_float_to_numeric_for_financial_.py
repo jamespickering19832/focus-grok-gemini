@@ -1,8 +1,8 @@
-"""Add landlord reference model
+"""Change float to numeric for financial fields
 
-Revision ID: 4e0acd24a1be
-Revises: 7e44d782114f
-Create Date: 2025-09-03 13:33:28.936946
+Revision ID: 0cac374427c4
+Revises: 4e0acd24a1be
+Create Date: 2025-09-03 13:57:17.219608
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '4e0acd24a1be'
-down_revision = '7e44d782114f'
+revision = '0cac374427c4'
+down_revision = '4e0acd24a1be'
 branch_labels = None
 depends_on = None
 
