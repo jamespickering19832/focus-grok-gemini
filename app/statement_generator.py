@@ -169,7 +169,7 @@ def generate_tenant_statement(tenant_id, start_date, end_date):
     pdf.set_font('Arial', size=10)
     pdf.cell(0, 5, f'Tenant: {tenant.name}', 0, 1)
     pdf.cell(0, 5, f'Email: {tenant.email}', 0, 1)
-    pdf.cell(0, 5, f'Period: {start_date.strftime('%d %b %Y')} - {end_date.strftime('%d %b %Y')}', 0, 1)
+    pdf.cell(0, 5, f"Period: {start_date.strftime('%d %b %Y')} - {end_date.strftime('%d %b %Y')}", 0, 1)
     pdf.ln(10)
 
     # Summary
