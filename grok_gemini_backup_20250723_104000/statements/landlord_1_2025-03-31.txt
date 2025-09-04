@@ -1,8 +1,0 @@
-Landlord Statement for L001
-Period: 2025-03-31 to 2025-08-14
-Opening Balance: 920.0
-Rent Received: 0
-Expenses: 0
-Agency Fees: 0.0
-Net: 0.0
-Closing Balance: 920.0
