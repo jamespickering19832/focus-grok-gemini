@@ -2,6 +2,7 @@
 import zipfile
 import os
 import datetime
+import fnmatch
 
 def create_zip_backup(output_filename, base_dir, exclude_dirs, exclude_files_patterns):
     with zipfile.ZipFile(output_filename, 'w', zipfile.ZIP_DEFLATED) as zipf:
@@ -25,13 +26,13 @@ def create_zip_backup(output_filename, base_dir, exclude_dirs, exclude_files_pat
     print(f"Backup created: {output_filename}")
 
 if __name__ == "__main__":
-    import fnmatch # Import fnmatch here
     
-    base_directory = "D:\focus grok gemini"
+    base_directory = "D:\\focus grok gemini"
     exclude_directories = ["venv", "__pycache__", "uploads"]
-    exclude_file_patterns = ["*.db", "*.pyc"]
+    exclude_file_patterns = ["*.db", "*.pyc", "*.csv"]
 
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     backup_filename = f"grok_gemini_backup_{timestamp}.zip"
 
     create_zip_backup(backup_filename, base_directory, exclude_directories, exclude_file_patterns)
+

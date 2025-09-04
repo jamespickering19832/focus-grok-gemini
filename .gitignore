@@ -76,4 +76,7 @@ Thumbs.db
 .profile
 .pythonstartup.py
 .vimrc
-README.txt\"csv/\" 
+
+# Ignore CSV files
+*.csv
+csv/ 

@@ -5,6 +5,7 @@
 {% block content %}
 <h1 class="mt-4">Generate Tenant Statement</h1>
 <form method="post" class="form">
+    {{ form.hidden_tag() }}
     <div class="form-group">
         <label for="tenant_id">Tenant:</label>
         <select name="tenant_id" id="tenant_id" class="form-control">
@@ -14,12 +15,10 @@
         </select>
     </div>
     <div class="form-group">
-        <label for="start_date">Start Date:</label>
-        <input type="date" name="start_date" id="start_date" class="form-control">
+        {{ form.start_date.label }} {{ form.start_date(class="form-control") }}
     </div>
     <div class="form-group">
-        <label for="end_date">End Date:</label>
-        <input type="date" name="end_date" id="end_date" class="form-control">
+        {{ form.end_date.label }} {{ form.end_date(class="form-control") }}
     </div>
     <input type="submit" value="Generate" class="btn btn-primary">
 </form>

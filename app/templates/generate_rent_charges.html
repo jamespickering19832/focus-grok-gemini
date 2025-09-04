@@ -8,7 +8,7 @@
 <form method="post" class="form">
     <div class="form-group">
         <label for="charge_date">Charge Date:</label>
-        <input type="date" name="charge_date" id="charge_date" class="form-control" value="{{ today.strftime('%Y-%m-%d') }}">
+        <input type="date" name="charge_date" id="charge_date" class="form-control" value="{{ charge_date.strftime('%Y-%m-%d') }}">
     </div>
     <input type="submit" value="Generate" class="btn btn-primary">
 </form>

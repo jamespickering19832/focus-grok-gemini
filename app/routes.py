@@ -360,6 +360,16 @@ def statements():
     form = StatementGenerationForm()
     landlords = Landlord.query.all()
     form.landlord_id.choices = [(l.id, l.name) for l in landlords]
+
+    if request.method == 'GET':
+        current_date_str = session.get('current_date')
+        if current_date_str:
+            current_date = datetime.strptime(current_date_str, '%Y-%m-%d').date()
+            start_date = current_date.replace(day=1)
+            end_date = start_date.replace(day=calendar.monthrange(start_date.year, start_date.month)[1])
+            form.start_date.data = start_date
+            form.end_date.data = end_date
+
     if form.validate_on_submit():
         landlord_id = form.landlord_id.data
         statement_type = form.statement_type.data
@@ -389,10 +399,21 @@ def statements():
 @main_bp.route('/tenant_statement', methods=['GET', 'POST'])
 @login_required
 def tenant_statement():
-    if request.method == 'POST':
+    form = DateRangeForm()
+    tenants = Tenant.query.all()
+    if request.method == 'GET':
+        current_date_str = session.get('current_date')
+        if current_date_str:
+            current_date = datetime.strptime(current_date_str, '%Y-%m-%d').date()
+            start_date = current_date.replace(day=1)
+            end_date = start_date.replace(day=calendar.monthrange(start_date.year, start_date.month)[1])
+            form.start_date.data = start_date
+            form.end_date.data = end_date
+
+    if form.validate_on_submit():
         tenant_id = int(request.form['tenant_id'])
-        start_date = datetime.strptime(request.form['start_date'], '%Y-%m-%d').date()
-        end_date = datetime.strptime(request.form['end_date'], '%Y-%m-%d').date()
+        start_date = form.start_date.data
+        end_date = form.end_date.data
         file_path, error = generate_tenant_statement(tenant_id, start_date, end_date)
         if error:
             flash(error, 'danger')
@@ -400,8 +421,7 @@ def tenant_statement():
             flash('Tenant statement generated')
             return redirect(url_for('main.download_statement', filename=os.path.basename(file_path)))
     
-    tenants = Tenant.query.all()
-    return render_template('tenant_statement.html', tenants=tenants)
+    return render_template('tenant_statement.html', tenants=tenants, form=form)
 
 @main_bp.route('/generate_rent_charges', methods=['GET', 'POST'])
 @login_required
@@ -438,7 +458,12 @@ def generate_rent_charges():
         flash(f'Rent charges generated for {len(tenants)} tenants.')
         return redirect(url_for('main.rent_charge_batches'))
     
-    return render_template('generate_rent_charges.html', today=date.today())
+    charge_date = date.today()
+    current_date_str = session.get('current_date')
+    if current_date_str:
+        charge_date = datetime.strptime(current_date_str, '%Y-%m-%d').date()
+
+    return render_template('generate_rent_charges.html', charge_date=charge_date)
 
 @main_bp.route('/rent_charge_batches')
 @login_required
@@ -472,13 +497,24 @@ def download_statement(filename):
 @login_required
 def accounts():
     main_accounts = Account.query.filter(Account.tenant_id.is_(None), Account.landlord_id.is_(None)).order_by(Account.name).all()
-    return render_template('accounts.html', accounts=main_accounts)
+    tenant_accounts = Account.query.filter(Account.tenant_id.isnot(None)).order_by(Account.name).all()
+    landlord_accounts = Account.query.filter(Account.landlord_id.isnot(None)).order_by(Account.name).all()
+    return render_template('accounts.html', main_accounts=main_accounts, tenant_accounts=tenant_accounts, landlord_accounts=landlord_accounts)
 
 @main_bp.route('/account_transactions/<int:account_id>')
 @login_required
 def account_transactions(account_id):
     account = Account.query.get_or_404(account_id)
     form = DateRangeForm()
+    if request.method == 'GET':
+        current_date_str = session.get('current_date')
+        if current_date_str:
+            current_date = datetime.strptime(current_date_str, '%Y-%m-%d').date()
+            start_date = current_date.replace(day=1)
+            end_date = start_date.replace(day=calendar.monthrange(start_date.year, start_date.month)[1])
+            form.start_date.data = start_date
+            form.end_date.data = end_date
+            
     transactions = Transaction.query.filter_by(account_id=account.id).order_by(Transaction.date.desc()).all()
     return render_template('account_transactions.html', account=account, transactions=transactions, form=form)
 
@@ -835,11 +871,19 @@ def landlord_payout(landlord_id):
         return redirect(url_for('main.landlord_account', id=landlord_id))
     
     if request.method == 'GET':
-        today = date.today()
-        first_day_of_month = today.replace(day=1)
-        last_day_of_month = first_day_of_month.replace(day=calendar.monthrange(today.year, today.month)[1])
-        form.start_date.data = first_day_of_month
-        form.end_date.data = last_day_of_month
+        current_date_str = session.get('current_date')
+        if current_date_str:
+            current_date = datetime.strptime(current_date_str, '%Y-%m-%d').date()
+            start_date = current_date.replace(day=1)
+            end_date = start_date.replace(day=calendar.monthrange(start_date.year, start_date.month)[1])
+            form.start_date.data = start_date
+            form.end_date.data = end_date
+        else:
+            today = date.today()
+            first_day_of_month = today.replace(day=1)
+            last_day_of_month = first_day_of_month.replace(day=calendar.monthrange(today.year, today.month)[1])
+            form.start_date.data = first_day_of_month
+            form.end_date.data = last_day_of_month
 
     return render_template('landlord_payout.html', form=form, landlord=landlord)
 
@@ -910,6 +954,15 @@ def banking():
     if not bank_account:
         flash('Master Bank Account not found.', 'danger')
         return render_template('banking.html', transactions=None, balance=0, form=form, search='')
+
+    if request.method == 'GET':
+        current_date_str = session.get('current_date')
+        if current_date_str:
+            current_date = datetime.strptime(current_date_str, '%Y-%m-%d').date()
+            start_date = current_date.replace(day=1)
+            end_date = start_date.replace(day=calendar.monthrange(start_date.year, start_date.month)[1])
+            form.start_date.data = start_date
+            form.end_date.data = end_date
 
     query = Transaction.query.filter(
         Transaction.account_id == bank_account.id
@@ -1108,6 +1161,13 @@ def add_manual_rent():
     if not bank_account:
         flash('Bank Account not found. Please create it in the accounts section.')
         return redirect(url_for('main.banking'))
+
+    if request.method == 'GET':
+        current_date_str = session.get('current_date')
+        if current_date_str:
+            current_date = datetime.strptime(current_date_str, '%Y-%m-%d').date()
+            form.date.data = current_date
+
     if form.validate_on_submit():
         transaction = Transaction(
             date=form.date.data,
@@ -1137,6 +1197,13 @@ def add_manual_expense():
     if not bank_account:
         flash('Bank Account not found. Please create it in the accounts section.')
         return redirect(url_for('main.banking'))
+
+    if request.method == 'GET':
+        current_date_str = session.get('current_date')
+        if current_date_str:
+            current_date = datetime.strptime(current_date_str, '%Y-%m-%d').date()
+            form.date.data = current_date
+
     if form.validate_on_submit():
         transaction = Transaction(
             date=form.date.data,
@@ -1246,6 +1313,15 @@ def split_transaction(transaction_id):
 @login_required
 def coded_transactions():
     form = DateRangeForm()
+    if request.method == 'GET':
+        current_date_str = session.get('current_date')
+        if current_date_str:
+            current_date = datetime.strptime(current_date_str, '%Y-%m-%d').date()
+            start_date = current_date.replace(day=1)
+            end_date = start_date.replace(day=calendar.monthrange(start_date.year, start_date.month)[1])
+            form.start_date.data = start_date
+            form.end_date.data = end_date
+            
     query = Transaction.query.filter(
         or_(Transaction.tenant_id.isnot(None), Transaction.landlord_id.isnot(None)),
         Transaction.parent_transaction_id.is_(None),

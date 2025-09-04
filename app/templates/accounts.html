@@ -1,22 +1,71 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>All Accounts</h1>
+    <h1>Accounts</h1>
     <div class="mb-3">
         <a href="{{ url_for('main.add_account') }}" class="btn btn-success">Add New Account</a>
     </div>
-    <div class="row">
-        {% for account in accounts %}
-            <div class="col-md-4 mb-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ account.name }}</h5>
-                        <p class="card-text">Type: {{ account.type }}</p>
-                        <td>{{ account.balance|round(2) }}</td>
-                        <a href="{{ url_for('main.account_transactions', account_id=account.id) }}" class="btn btn-primary">View Transactions</a>
+
+    <ul class="nav nav-tabs" id="accountTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <a class="nav-link active" id="main-accounts-tab" data-toggle="tab" href="#main-accounts" role="tab" aria-controls="main-accounts" aria-selected="true">Main Accounts</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" id="tenant-accounts-tab" data-toggle="tab" href="#tenant-accounts" role="tab" aria-controls="tenant-accounts" aria-selected="false">Tenant Accounts</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" id="landlord-accounts-tab" data-toggle="tab" href="#landlord-accounts" role="tab" aria-controls="landlord-accounts" aria-selected="false">Landlord Accounts</a>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="accountTabsContent">
+        <div class="tab-pane fade show active" id="main-accounts" role="tabpanel" aria-labelledby="main-accounts-tab">
+            <div class="row mt-3">
+                {% for account in main_accounts %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ account.name }}</h5>
+                                <p class="card-text">Type: {{ account.type }}</p>
+                                <td>{{ account.balance|round(2) }}</td>
+                                <a href="{{ url_for('main.account_transactions', account_id=account.id) }}" class="btn btn-primary">View Transactions</a>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                {% endfor %}
             </div>
-        {% endfor %}
+        </div>
+        <div class="tab-pane fade" id="tenant-accounts" role="tabpanel" aria-labelledby="tenant-accounts-tab">
+            <div class="row mt-3">
+                {% for account in tenant_accounts %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ account.name }}</h5>
+                                <p class="card-text">Type: {{ account.type }}</p>
+                                <td>{{ account.balance|round(2) }}</td>
+                                <a href="{{ url_for('main.account_transactions', account_id=account.id) }}" class="btn btn-primary">View Transactions</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="tab-pane fade" id="landlord-accounts" role="tabpanel" aria-labelledby="landlord-accounts-tab">
+            <div class="row mt-3">
+                {% for account in landlord_accounts %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ account.name }}</h5>
+                                <p class="card-text">Type: {{ account.type }}</p>
+                                <td>{{ account.balance|round(2) }}</td>
+                                <a href="{{ url_for('main.account_transactions', account_id=account.id) }}" class="btn btn-primary">View Transactions</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
     </div>
 {% endblock %}
